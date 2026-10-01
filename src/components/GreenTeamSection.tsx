@@ -50,20 +50,20 @@ export const GreenTeamSection: React.FC<GreenTeamSectionProps> = ({
   const [expandedId, setExpandedId] = useState<string>('x8');
 
   return (
-    <section className="w-full bg-white text-gray-900 py-16 sm:py-20 lg:py-24 px-4 sm:px-6 lg:px-8 select-none">
+    <section className="w-full bg-white text-gray-900 pt-7 sm:pt-9 lg:pt-11 pb-14 sm:pb-16 lg:pb-20 px-4 sm:px-6 lg:px-8 select-none">
       <div className="max-w-[1180px] mx-auto">
-        {/* Section Heading & Subtitle - Left Aligned to Card Container */}
-        <div className="mb-8 sm:mb-10 text-left">
-          <h2 className="text-3xl sm:text-4xl lg:text-[42px] font-bold text-gray-950 tracking-tight leading-tight">
+        {/* Section Heading & Subtitle - Aligned to Card Container */}
+        <div className="mb-6 sm:mb-7 text-left">
+          <h2 className="text-3xl sm:text-4xl lg:text-[40px] font-bold text-gray-950 tracking-tight leading-tight">
             Meet The Green Team
           </h2>
-          <p className="mt-2 sm:mt-3 text-sm sm:text-base text-gray-700 font-normal leading-normal">
+          <p className="mt-1.5 sm:mt-2 text-xs sm:text-sm text-gray-600 font-normal leading-normal">
             A purifier for every need and every room.
           </p>
         </div>
 
-        {/* Desktop & Tablet: Horizontal Interactive Accordion Cards */}
-        <div className="hidden md:flex items-stretch gap-5 lg:gap-6 w-full h-[320px] lg:h-[340px]">
+        {/* Desktop & Tablet: Horizontal Interactive Accordion Cards (Aligned with red box height) */}
+        <div className="hidden md:flex items-stretch gap-5 lg:gap-6 w-full h-[240px] lg:h-[250px]">
           {PRODUCTS.map((product) => {
             const isExpanded = expandedId === product.id;
 
@@ -78,37 +78,37 @@ export const GreenTeamSection: React.FC<GreenTeamSectionProps> = ({
                 style={{
                   flex: isExpanded ? '2.1 1 0%' : '1 1 0%',
                 }}
-                className={`relative bg-[#F8F8F7] rounded-[16px] p-6 lg:p-7 transition-all duration-300 ease-in-out overflow-hidden shadow-[0_4px_24px_rgba(0,0,0,0.03)] border border-black/[0.04] flex flex-col justify-between ${
+                className={`relative bg-[#F8F8F7] rounded-[14px] p-5 lg:p-6 transition-all duration-300 ease-in-out overflow-hidden shadow-[0_10px_28px_rgba(0,0,0,0.07)] border border-black/[0.04] flex flex-col justify-between ${
                   isExpanded
                     ? 'cursor-default'
-                    : 'cursor-pointer hover:bg-[#F3F3F1] hover:shadow-[0_6px_28px_rgba(0,0,0,0.05)]'
+                    : 'cursor-pointer hover:bg-[#F3F3F1] hover:shadow-[0_14px_32px_rgba(0,0,0,0.11)]'
                 }`}
               >
                 {isExpanded ? (
                   /* Expanded Card State: Left Info Column + Right Image Column */
-                  <div className="w-full h-full flex items-center justify-between gap-4">
+                  <div className="w-full h-full flex items-center justify-between gap-3">
                     {/* Left Info Area */}
-                    <div className="flex-1 flex flex-col justify-between h-full py-1 pr-2 max-w-[62%]">
+                    <div className="flex-1 flex flex-col justify-between h-full py-0.5 pr-2 max-w-[64%]">
                       <div>
-                        <span className="text-[12px] sm:text-[13px] text-gray-400 font-normal block mb-1">
+                        <span className="text-[11px] sm:text-xs text-gray-400 font-normal block mb-0.5 leading-tight">
                           {product.capacity}
                         </span>
-                        <h3 className="text-2xl sm:text-3xl font-bold text-gray-950 tracking-tight mb-3">
+                        <h3 className="text-xl sm:text-2xl font-bold text-gray-950 tracking-tight leading-snug mb-1.5">
                           {product.name}
                         </h3>
-                        <p className="text-xs sm:text-[13px] text-gray-700 leading-relaxed font-normal">
+                        <p className="text-[11px] sm:text-[12px] text-gray-700 leading-relaxed font-normal line-clamp-3">
                           {product.description}
                         </p>
                       </div>
 
-                      <div className="pt-4">
+                      <div className="pt-2">
                         <button
                           type="button"
                           onClick={(e) => {
                             e.stopPropagation();
                             onShopNowClick?.(product.name);
                           }}
-                          className="h-10 px-6 sm:px-7 bg-[#0070F3] hover:bg-[#0060df] active:bg-[#0050c0] text-white text-xs sm:text-[13px] font-medium rounded-[6px] shadow-sm transition-colors duration-150 flex items-center justify-center cursor-pointer"
+                          className="h-8 sm:h-[34px] px-5 sm:px-6 bg-[#0070F3] hover:bg-[#0060df] active:bg-[#0050c0] text-white text-xs font-semibold rounded-[5px] shadow-sm transition-colors duration-150 flex items-center justify-center cursor-pointer"
                         >
                           Shop Now
                         </button>
@@ -116,32 +116,32 @@ export const GreenTeamSection: React.FC<GreenTeamSectionProps> = ({
                     </div>
 
                     {/* Right Product Image */}
-                    <div className="w-[36%] h-full flex items-center justify-center">
+                    <div className="w-[34%] h-full flex items-center justify-center">
                       <img
                         src={product.image}
                         alt={product.imageAlt}
-                        className="max-h-[240px] lg:max-h-[260px] w-auto object-contain drop-shadow-sm pointer-events-none"
+                        className="max-h-[175px] lg:max-h-[190px] w-auto object-contain drop-shadow-sm pointer-events-none"
                       />
                     </div>
                   </div>
                 ) : (
                   /* Collapsed Card State: Centered Product Image + Bottom Info */
-                  <div className="w-full h-full flex flex-col items-center justify-between py-2">
+                  <div className="w-full h-full flex flex-col items-center justify-between py-1">
                     {/* Product Image */}
                     <div className="flex-1 w-full flex items-center justify-center">
                       <img
                         src={product.image}
                         alt={product.imageAlt}
-                        className="max-h-[170px] lg:max-h-[185px] w-auto object-contain drop-shadow-sm pointer-events-none transition-transform duration-300"
+                        className="max-h-[130px] lg:max-h-[142px] w-auto object-contain drop-shadow-sm pointer-events-none transition-transform duration-300"
                       />
                     </div>
 
                     {/* Bottom Capacity & Name */}
-                    <div className="text-center pt-2">
-                      <span className="text-[11px] sm:text-[12px] text-gray-400 font-normal block leading-tight">
+                    <div className="text-center pt-1.5">
+                      <span className="text-[10px] sm:text-[11px] text-gray-400 font-normal block leading-tight">
                         {product.capacity}
                       </span>
-                      <h4 className="text-lg sm:text-xl font-bold text-gray-950 mt-0.5 leading-snug">
+                      <h4 className="text-base sm:text-[17px] font-bold text-gray-950 mt-0.5 leading-snug">
                         {product.name}
                       </h4>
                     </div>
@@ -152,8 +152,8 @@ export const GreenTeamSection: React.FC<GreenTeamSectionProps> = ({
           })}
         </div>
 
-        {/* Mobile Accordion View (Stack vertically, expanding on click) */}
-        <div className="flex md:hidden flex-col gap-4 w-full">
+        {/* Mobile Accordion View */}
+        <div className="flex md:hidden flex-col gap-3.5 w-full">
           {PRODUCTS.map((product) => {
             const isExpanded = expandedId === product.id;
 
@@ -165,26 +165,26 @@ export const GreenTeamSection: React.FC<GreenTeamSectionProps> = ({
                     setExpandedId(product.id);
                   }
                 }}
-                className={`bg-[#F8F8F7] rounded-[14px] p-5 transition-all duration-300 ease-in-out border border-black/[0.04] shadow-sm ${
-                  isExpanded ? 'cursor-default' : 'cursor-pointer'
+                className={`bg-[#F8F8F7] rounded-[14px] p-4 transition-all duration-300 ease-in-out border border-black/[0.04] shadow-[0_6px_20px_rgba(0,0,0,0.06)] ${
+                  isExpanded ? 'cursor-default' : 'cursor-pointer hover:bg-[#F3F3F1]'
                 }`}
               >
                 {isExpanded ? (
-                  <div className="flex flex-col gap-4">
-                    <div className="flex items-center justify-between gap-4">
+                  <div className="flex flex-col gap-3">
+                    <div className="flex items-center justify-between gap-3">
                       <div className="flex-1">
-                        <span className="text-xs text-gray-400 font-normal block mb-1">
+                        <span className="text-[11px] text-gray-400 font-normal block mb-0.5">
                           {product.capacity}
                         </span>
-                        <h3 className="text-2xl font-bold text-gray-950 tracking-tight">
+                        <h3 className="text-xl font-bold text-gray-950 tracking-tight">
                           {product.name}
                         </h3>
                       </div>
-                      <div className="w-24 h-28 flex items-center justify-center">
+                      <div className="w-20 h-24 flex items-center justify-center">
                         <img
                           src={product.image}
                           alt={product.imageAlt}
-                          className="max-h-24 w-auto object-contain"
+                          className="max-h-20 w-auto object-contain"
                         />
                       </div>
                     </div>
@@ -193,14 +193,14 @@ export const GreenTeamSection: React.FC<GreenTeamSectionProps> = ({
                       {product.description}
                     </p>
 
-                    <div className="pt-2">
+                    <div className="pt-1">
                       <button
                         type="button"
                         onClick={(e) => {
                           e.stopPropagation();
                           onShopNowClick?.(product.name);
                         }}
-                        className="w-full h-10 bg-[#0070F3] hover:bg-[#0060df] text-white text-xs font-semibold rounded-[6px] shadow-sm flex items-center justify-center"
+                        className="w-full h-9 bg-[#0070F3] hover:bg-[#0060df] text-white text-xs font-semibold rounded-[5px] shadow-sm flex items-center justify-center"
                       >
                         Shop Now
                       </button>
@@ -209,18 +209,18 @@ export const GreenTeamSection: React.FC<GreenTeamSectionProps> = ({
                 ) : (
                   <div className="flex items-center justify-between">
                     <div>
-                      <span className="text-[11px] text-gray-400 font-normal block leading-tight">
+                      <span className="text-[10px] text-gray-400 font-normal block leading-tight">
                         {product.capacity}
                       </span>
-                      <h4 className="text-lg font-bold text-gray-950 mt-0.5 leading-snug">
+                      <h4 className="text-base font-bold text-gray-950 mt-0.5 leading-snug">
                         {product.name}
                       </h4>
                     </div>
-                    <div className="w-16 h-16 flex items-center justify-center">
+                    <div className="w-14 h-14 flex items-center justify-center">
                       <img
                         src={product.image}
                         alt={product.imageAlt}
-                        className="max-h-14 w-auto object-contain"
+                        className="max-h-12 w-auto object-contain"
                       />
                     </div>
                   </div>
