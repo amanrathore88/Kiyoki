@@ -46,23 +46,36 @@ const baseProducts: ProductItem[] = [
 ];
 
 const N = baseProducts.length;
-// 3 full sets for seamless infinite looping buffer in both directions
-const extendedProducts = [...baseProducts, ...baseProducts, ...baseProducts];
+// 5 full buffer sets (20 items) for generous, glitch-free bidirectional runway
+const extendedProducts = [
+  ...baseProducts,
+  ...baseProducts,
+  ...baseProducts,
+  ...baseProducts,
+  ...baseProducts,
+];
+// Start in the exact center set (Set 2: index 2 * N = 8)
+const INITIAL_INDEX = 2 * N;
 
 export const ProductCarousel: React.FC<ProductCarouselProps> = ({
   onShopClick,
   onLearnMoreClick,
 }) => {
-  // Start in the middle set at index N (Kiyoki X8)
-  const [virtualIndex, setVirtualIndex] = useState<number>(N);
-  const [isTransitioning, setIsTransitioning] = useState<boolean>(false);
+  const [virtualIndex, setVirtualIndex] = useState<number>(INITIAL_INDEX);
   const [noTransition, setNoTransition] = useState<boolean>(false);
   const [dragOffset, setDragOffset] = useState<number>(0);
   const [isDragging, setIsDragging] = useState<boolean>(false);
   const [containerWidth, setContainerWidth] = useState<number>(1200);
 
   const containerRef = useRef<HTMLDivElement>(null);
+  const trackRef = useRef<HTMLDivElement>(null);
   const dragStartX = useRef<number | null>(null);
+  
+  // Transition lock ref and failsafe timer to completely prevent getting stuck
+  const isTransitioningRef = useRef<boolean>(false);
+  const transitionTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const virtualIndexRef = useRef<number>(INITIAL_INDEX);
+  virtualIndexRef.current = virtualIndex;
 
   // Measure container dimensions on mount and resize
   useEffect(() => {
@@ -76,30 +89,93 @@ export const ProductCarousel: React.FC<ProductCarouselProps> = ({
     return () => window.removeEventListener('resize', updateSize);
   }, []);
 
+  // Normalizes the position back to the middle buffer set seamlessly
+  const normalizePosition = useCallback((targetIdx: number) => {
+    // Middle buffer range is [2*N .. 3*N - 1] (indices 8 to 11)
+    if (targetIdx >= 3 * N || targetIdx < 2 * N) {
+      const offsetFromBase = ((targetIdx % N) + N) % N;
+      const normalizedIdx = 2 * N + offsetFromBase;
+
+      if (normalizedIdx !== targetIdx) {
+        setNoTransition(true);
+        setVirtualIndex(normalizedIdx);
+      }
+    }
+  }, []);
+
+  // When noTransition becomes true, force a reflow and re-enable transitions in next frame
+  useEffect(() => {
+    if (noTransition) {
+      if (trackRef.current) {
+        // Force synchronous browser reflow so it registers the jumped position
+        void trackRef.current.offsetHeight;
+      }
+      // Re-enable smooth CSS transition in the next double animation frame
+      let rAF2: number;
+      const rAF1 = requestAnimationFrame(() => {
+        rAF2 = requestAnimationFrame(() => {
+          setNoTransition(false);
+        });
+      });
+      return () => {
+        cancelAnimationFrame(rAF1);
+        if (rAF2) cancelAnimationFrame(rAF2);
+      };
+    }
+  }, [noTransition]);
+
+  // Clean transition end handler: unlocks transition state and normalizes buffer
+  const handleTransitionEnd = (e: React.TransitionEvent<HTMLDivElement>) => {
+    // Only respond to the track's own transform transition, ignore bubbled events from children
+    if (e.target !== e.currentTarget || e.propertyName !== 'transform') return;
+
+    if (transitionTimeoutRef.current) {
+      clearTimeout(transitionTimeoutRef.current);
+      transitionTimeoutRef.current = null;
+    }
+
+    isTransitioningRef.current = false;
+    normalizePosition(virtualIndexRef.current);
+  };
+
+  // Main slide function with automatic timeout failsafe
   const slideTo = useCallback(
     (newIdx: number) => {
-      if (isTransitioning) return;
+      // If already mid-transition, reject to maintain smooth cadence
+      if (isTransitioningRef.current) return;
+
       setNoTransition(false);
-      setIsTransitioning(true);
+      isTransitioningRef.current = true;
       setVirtualIndex(newIdx);
+
+      // Failsafe timer: transition duration is 500ms, unlock at 550ms no matter what
+      if (transitionTimeoutRef.current) {
+        clearTimeout(transitionTimeoutRef.current);
+      }
+      transitionTimeoutRef.current = setTimeout(() => {
+        isTransitioningRef.current = false;
+        normalizePosition(virtualIndexRef.current);
+      }, 550);
     },
-    [isTransitioning]
+    [normalizePosition]
   );
 
   const nextSlide = useCallback(() => {
-    slideTo(virtualIndex + 1);
-  }, [slideTo, virtualIndex]);
+    slideTo(virtualIndexRef.current + 1);
+  }, [slideTo]);
 
   const prevSlide = useCallback(() => {
-    slideTo(virtualIndex - 1);
-  }, [slideTo, virtualIndex]);
+    slideTo(virtualIndexRef.current - 1);
+  }, [slideTo]);
 
   const goToSlide = (targetBaseIdx: number) => {
-    if (isTransitioning) return;
-    slideTo(N + targetBaseIdx);
+    if (isTransitioningRef.current) return;
+    const currentBaseIdx = ((virtualIndexRef.current % N) + N) % N;
+    const delta = targetBaseIdx - currentBaseIdx;
+    slideTo(virtualIndexRef.current + delta);
   };
 
-  // Keyboard navigation
+  // Keyboard arrow keys navigation
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'ArrowRight') nextSlide();
@@ -109,19 +185,16 @@ export const ProductCarousel: React.FC<ProductCarouselProps> = ({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [nextSlide, prevSlide]);
 
-  // Seamless silent jump when sliding into either buffer set
-  const handleTransitionEnd = () => {
-    setIsTransitioning(false);
-    if (virtualIndex >= 2 * N) {
-      setNoTransition(true);
-      setVirtualIndex((prev) => prev - N);
-    } else if (virtualIndex < N) {
-      setNoTransition(true);
-      setVirtualIndex((prev) => prev + N);
-    }
-  };
+  // Clean up timers on unmount
+  useEffect(() => {
+    return () => {
+      if (transitionTimeoutRef.current) {
+        clearTimeout(transitionTimeoutRef.current);
+      }
+    };
+  }, []);
 
-  // Touch handlers
+  // Touch swipe handlers
   const handleTouchStart = (e: React.TouchEvent) => {
     dragStartX.current = e.touches[0].clientX;
     setIsDragging(true);
@@ -205,25 +278,27 @@ export const ProductCarousel: React.FC<ProductCarouselProps> = ({
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
       >
-        {/* Navigation Arrow: Previous (Always available for infinite loop) */}
+        {/* Navigation Arrow: Previous (Infinite continuous navigation) */}
         <button
+          type="button"
           onClick={(e) => {
             e.stopPropagation();
             prevSlide();
           }}
-          className="absolute left-3 sm:left-5 top-1/2 -translate-y-1/2 z-30 w-9 h-11 sm:w-10 sm:h-12 rounded-lg bg-white/95 hover:bg-white text-gray-900 shadow-lg backdrop-blur-xs flex items-center justify-center transition-transform hover:scale-105 active:scale-95 focus:outline-none"
+          className="absolute left-3 sm:left-5 top-1/2 -translate-y-1/2 z-30 w-9 h-11 sm:w-10 sm:h-12 rounded-lg bg-white/95 hover:bg-white text-gray-900 shadow-lg backdrop-blur-xs flex items-center justify-center transition-transform hover:scale-105 active:scale-95 focus:outline-none cursor-pointer"
           aria-label="Previous product"
         >
           <ChevronLeft className="w-5 h-5 text-gray-900 stroke-[2.5]" />
         </button>
 
-        {/* Navigation Arrow: Next (Always available for infinite loop) */}
+        {/* Navigation Arrow: Next (Infinite continuous navigation) */}
         <button
+          type="button"
           onClick={(e) => {
             e.stopPropagation();
             nextSlide();
           }}
-          className="absolute right-3 sm:right-5 top-1/2 -translate-y-1/2 z-30 w-9 h-11 sm:w-10 sm:h-12 rounded-lg bg-white/95 hover:bg-white text-gray-900 shadow-lg backdrop-blur-xs flex items-center justify-center transition-transform hover:scale-105 active:scale-95 focus:outline-none"
+          className="absolute right-3 sm:right-5 top-1/2 -translate-y-1/2 z-30 w-9 h-11 sm:w-10 sm:h-12 rounded-lg bg-white/95 hover:bg-white text-gray-900 shadow-lg backdrop-blur-xs flex items-center justify-center transition-transform hover:scale-105 active:scale-95 focus:outline-none cursor-pointer"
           aria-label="Next product"
         >
           <ChevronRight className="w-5 h-5 text-gray-900 stroke-[2.5]" />
@@ -231,6 +306,7 @@ export const ProductCarousel: React.FC<ProductCarouselProps> = ({
 
         {/* Continuous Infinite Sliding Track */}
         <div
+          ref={trackRef}
           onTransitionEnd={handleTransitionEnd}
           className="flex items-stretch will-change-transform"
           style={{
@@ -238,7 +314,7 @@ export const ProductCarousel: React.FC<ProductCarouselProps> = ({
             transition:
               isDragging || noTransition
                 ? 'none'
-                : 'transform 0.55s cubic-bezier(0.25, 1, 0.5, 1)',
+                : 'transform 0.5s cubic-bezier(0.25, 1, 0.5, 1)',
             gap: `${gap}px`,
           }}
         >
@@ -273,14 +349,14 @@ export const ProductCarousel: React.FC<ProductCarouselProps> = ({
                   </span>
                 </div>
 
-                {/* Bottom-Left Content: Name, Room Subtitle, CTAs (STRICTLY NO PRICING) */}
+                {/* Bottom-Left Content: Name, Room Subtitle, CTAs */}
                 <div className="absolute inset-x-0 bottom-0 p-6 sm:p-8 lg:p-10 z-10 flex flex-col justify-end text-white">
                   {/* Product Name */}
                   <h3 className="text-3xl sm:text-4xl lg:text-[42px] font-extrabold text-white tracking-tight leading-none drop-shadow-sm">
                     {item.name}
                   </h3>
 
-                  {/* Subtitle / Description (Replacing price) */}
+                  {/* Subtitle / Description */}
                   <p className="mt-2 text-xs sm:text-sm text-white/90 font-medium tracking-wide drop-shadow-xs max-w-md">
                     {item.description}
                   </p>
@@ -288,21 +364,23 @@ export const ProductCarousel: React.FC<ProductCarouselProps> = ({
                   {/* CTA Buttons */}
                   <div className="mt-5 sm:mt-6 flex items-center gap-3 sm:gap-3.5 flex-wrap">
                     <button
+                      type="button"
                       onClick={(e) => {
                         e.stopPropagation();
                         if (onShopClick) onShopClick(item.name);
                       }}
-                      className="px-6 sm:px-7 py-2.5 sm:py-3 bg-[#3168E8] hover:bg-[#2355cc] active:bg-[#1a44a8] text-white text-xs sm:text-sm font-semibold rounded-[6px] shadow-sm hover:shadow transition-all duration-200"
+                      className="px-6 sm:px-7 py-2.5 sm:py-3 bg-[#3168E8] hover:bg-[#2355cc] active:bg-[#1a44a8] text-white text-xs sm:text-sm font-semibold rounded-[6px] shadow-sm hover:shadow transition-all duration-200 cursor-pointer"
                     >
                       Shop Now
                     </button>
 
                     <button
+                      type="button"
                       onClick={(e) => {
                         e.stopPropagation();
                         if (onLearnMoreClick) onLearnMoreClick(item.name);
                       }}
-                      className="px-6 sm:px-7 py-2.5 sm:py-3 bg-white hover:bg-gray-100 active:bg-gray-200 text-[#111827] text-xs sm:text-sm font-semibold rounded-[6px] shadow-2xs transition-all duration-200"
+                      className="px-6 sm:px-7 py-2.5 sm:py-3 bg-white hover:bg-gray-100 active:bg-gray-200 text-[#111827] text-xs sm:text-sm font-semibold rounded-[6px] shadow-2xs transition-all duration-200 cursor-pointer"
                     >
                       Learn More
                     </button>
@@ -313,15 +391,16 @@ export const ProductCarousel: React.FC<ProductCarouselProps> = ({
           })}
         </div>
 
-        {/* Centered Pagination Indicator Dots (matching Tesla reference: ● ○ ○ ○) */}
+        {/* Centered Pagination Indicator Dots */}
         <div className="flex items-center justify-center gap-2.5 mt-7 sm:mt-8">
           {baseProducts.map((_, idx) => {
             const isActive = idx === activeDotIndex;
             return (
               <button
+                type="button"
                 key={idx}
                 onClick={() => goToSlide(idx)}
-                className={`transition-all duration-300 rounded-full focus:outline-none ${
+                className={`transition-all duration-300 rounded-full focus:outline-none cursor-pointer ${
                   isActive
                     ? 'w-2.5 h-2.5 bg-[#111827] scale-110'
                     : 'w-2.5 h-2.5 bg-gray-300 hover:bg-gray-400'
@@ -336,3 +415,5 @@ export const ProductCarousel: React.FC<ProductCarouselProps> = ({
     </section>
   );
 };
+
+export default ProductCarousel;
