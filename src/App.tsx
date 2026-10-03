@@ -7,6 +7,7 @@ import { FiltrationSection } from './components/FiltrationSection';
 import { GreenTeamSection } from './components/GreenTeamSection';
 import { LifestyleBrandSection } from './components/LifestyleBrandSection';
 import { AntiGravityBanner } from './components/AntiGravityBanner';
+import { Footer } from './components/Footer';
 import { SearchModal } from './components/SearchModal';
 import { CartDrawer, CartItem } from './components/CartDrawer';
 
@@ -130,6 +131,12 @@ export function App() {
         {/* SECTION 07: Breathe Better With Kiyoki (Anti-Gravity Promotional Banner) */}
         <AntiGravityBanner
           onLearnMoreClick={handleLearnMoreClick}
+        />
+
+        {/* SECTION 08: Final Footer Section (Full-Width Solid Black Footer) */}
+        <Footer
+          onOpenSearch={() => setIsSearchOpen(true)}
+          onOpenCart={() => setIsCartOpen(true)}
         />
       </main>
 
