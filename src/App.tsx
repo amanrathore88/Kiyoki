@@ -5,6 +5,7 @@ import { Section02 } from './components/Section02';
 import { ProductCarousel } from './components/ProductCarousel';
 import { FiltrationSection } from './components/FiltrationSection';
 import { GreenTeamSection } from './components/GreenTeamSection';
+import { LifestyleBrandSection } from './components/LifestyleBrandSection';
 import { SearchModal } from './components/SearchModal';
 import { CartDrawer, CartItem } from './components/CartDrawer';
 
@@ -118,6 +119,11 @@ export function App() {
             });
             setIsCartOpen(true);
           }}
+        />
+
+        {/* SECTION 06: Purify Your Space, Elevate Your Life (Lifestyle & Brand-Story Section) */}
+        <LifestyleBrandSection
+          onLearnMoreClick={handleLearnMoreClick}
         />
       </main>
 
