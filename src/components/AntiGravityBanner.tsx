@@ -41,13 +41,14 @@ export const AntiGravityBanner: React.FC<AntiGravityBannerProps> = ({
             Separate HD transparent asset (2200px wide) containing
             Kiyoki air purifiers on white cylindrical display platforms
             with natural houseplant foliage background.
-            Display platforms align visually to bottom edge.
+            Shifted downward via translate-y so the purifiers have
+            clean breathing room at the top and platforms sit grounded.
             ========================================================= */}
         <div className="absolute right-0 bottom-0 z-10 h-full w-[50%] sm:w-[54%] lg:w-[58%] flex items-end justify-end pointer-events-none select-none">
           <img
             src="/images/antigravity_purifiers_transparent.png"
             alt="Kiyoki Air Purifiers on Display Platforms"
-            className="h-full w-auto max-w-full object-contain object-bottom filter drop-shadow-[0_10px_25px_rgba(0,0,0,0.12)] transition-transform duration-500 ease-out"
+            className="h-full w-auto max-w-full object-contain object-bottom translate-y-3.5 sm:translate-y-5 lg:translate-y-6 filter drop-shadow-[0_10px_25px_rgba(0,0,0,0.12)] transition-transform duration-500 ease-out"
             loading="eager"
             decoding="async"
           />
