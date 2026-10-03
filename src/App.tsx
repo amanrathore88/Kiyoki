@@ -6,6 +6,7 @@ import { ProductCarousel } from './components/ProductCarousel';
 import { FiltrationSection } from './components/FiltrationSection';
 import { GreenTeamSection } from './components/GreenTeamSection';
 import { LifestyleBrandSection } from './components/LifestyleBrandSection';
+import { AntiGravityBanner } from './components/AntiGravityBanner';
 import { SearchModal } from './components/SearchModal';
 import { CartDrawer, CartItem } from './components/CartDrawer';
 
@@ -123,6 +124,11 @@ export function App() {
 
         {/* SECTION 06: Purify Your Space, Elevate Your Life (Lifestyle & Brand-Story Section) */}
         <LifestyleBrandSection
+          onLearnMoreClick={handleLearnMoreClick}
+        />
+
+        {/* SECTION 07: Breathe Better With Kiyoki (Anti-Gravity Promotional Banner) */}
+        <AntiGravityBanner
           onLearnMoreClick={handleLearnMoreClick}
         />
       </main>
