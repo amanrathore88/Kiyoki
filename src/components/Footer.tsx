@@ -4,11 +4,13 @@ import { KiyokiLogo } from './KiyokiLogo';
 interface FooterProps {
   onOpenSearch?: () => void;
   onOpenCart?: () => void;
+  onNavigate?: (page: 'home' | 'shop') => void;
 }
 
 export const Footer: React.FC<FooterProps> = ({
   onOpenSearch,
   onOpenCart,
+  onNavigate,
 }) => {
   const [email, setEmail] = useState('');
   const [subscribeStatus, setSubscribeStatus] = useState<'idle' | 'success' | 'error'>('idle');
@@ -43,6 +45,17 @@ export const Footer: React.FC<FooterProps> = ({
   };
 
   const handleNavClick = (href: string, label: string) => {
+    if (label === 'Air Purifiers' || label === 'Filters' || label === 'Accessories' || label === 'Compare Models' || label === 'Refurbished Products') {
+      if (onNavigate) {
+        onNavigate('shop');
+        return;
+      }
+      if (onOpenCart) {
+        onOpenCart();
+        return;
+      }
+    }
+
     if (href.startsWith('#')) {
       const element = document.querySelector(href);
       if (element) {
@@ -54,13 +67,6 @@ export const Footer: React.FC<FooterProps> = ({
     if (label === 'Help Center' || label === 'Contact Us' || label === 'Installation Guide') {
       setActiveSupportModal(label);
       return;
-    }
-
-    if (label === 'Air Purifiers' || label === 'Filters' || label === 'Accessories') {
-      if (onOpenCart) {
-        onOpenCart();
-        return;
-      }
     }
 
     if (onOpenSearch) {
@@ -84,7 +90,10 @@ export const Footer: React.FC<FooterProps> = ({
           {/* COLUMN 1: BRAND, NEWSLETTER & SOCIALS (lg:col-span-4 / ~30% width) */}
           <div className="lg:col-span-4 flex flex-col items-start text-left">
             {/* Kiyoki White Vector Logo */}
-            <div className="h-8 flex items-center">
+            <div 
+              className="h-8 flex items-center cursor-pointer transition-transform active:scale-95"
+              onClick={() => onNavigate?.('home')}
+            >
               <KiyokiLogo variant="white" />
             </div>
 

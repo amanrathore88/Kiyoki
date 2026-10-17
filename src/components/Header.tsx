@@ -6,23 +6,50 @@ interface HeaderProps {
   onOpenSearch: () => void;
   onOpenCart: () => void;
   cartCount?: number;
+  currentPage?: 'home' | 'shop';
+  onNavigate?: (page: 'home' | 'shop') => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({ 
   onOpenSearch, 
   onOpenCart, 
-  cartCount = 0 
+  cartCount = 0,
+  currentPage = 'home',
+  onNavigate,
 }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const navLinks = [
-    { name: 'Purifiers', href: '#' },
-    { name: 'Technology', href: '#' },
-    { name: 'Air Quality', href: '#' },
+    { name: 'Purifiers', href: '#products' },
+    { name: 'Technology', href: '#technology' },
+    { name: 'Air Quality', href: '#technology' },
     { name: 'Discover', href: '#' },
     { name: 'Support', href: '#' },
-    { name: 'Shop', href: '#' },
+    { name: 'Shop', href: '#shop' },
   ];
+
+  const handleNavClick = (e: React.MouseEvent, linkName: string) => {
+    e.preventDefault();
+    if (linkName === 'Shop') {
+      onNavigate?.('shop');
+    } else if (linkName === 'Purifiers') {
+      if (currentPage === 'shop') {
+        const el = document.getElementById('products');
+        if (el) el.scrollIntoView({ behavior: 'smooth' });
+      } else {
+        onNavigate?.('home');
+      }
+    } else if (linkName === 'Technology') {
+      if (currentPage === 'shop') {
+        const el = document.getElementById('technology');
+        if (el) el.scrollIntoView({ behavior: 'smooth' });
+      } else {
+        onNavigate?.('home');
+      }
+    } else {
+      onNavigate?.('home');
+    }
+  };
 
   return (
     <header className="sticky top-0 z-40 bg-white transition-all duration-300">
@@ -31,7 +58,15 @@ export const Header: React.FC<HeaderProps> = ({
         
         {/* Left: KIYOKI Logo */}
         <div className="flex items-center shrink-0">
-          <a href="#" className="flex items-center group transition-transform active:scale-95" aria-label="Kiyoki Home">
+          <a
+            href="#"
+            onClick={(e) => {
+              e.preventDefault();
+              onNavigate?.('home');
+            }}
+            className="flex items-center group transition-transform active:scale-95"
+            aria-label="Kiyoki Home"
+          >
             <KiyokiLogo variant="dark" height={26} />
           </a>
         </div>
@@ -42,7 +77,12 @@ export const Header: React.FC<HeaderProps> = ({
             <a
               key={link.name}
               href={link.href}
-              className="text-[14px] lg:text-[15px] font-medium text-gray-800 hover:text-sky-brand transition-colors duration-200 tracking-normal"
+              onClick={(e) => handleNavClick(e, link.name)}
+              className={`text-[14px] lg:text-[15px] font-medium transition-colors duration-200 tracking-normal ${
+                currentPage === 'shop' && link.name === 'Shop'
+                  ? 'text-sky-brand'
+                  : 'text-gray-800 hover:text-sky-brand'
+              }`}
             >
               {link.name}
             </a>
@@ -102,8 +142,15 @@ export const Header: React.FC<HeaderProps> = ({
               <a
                 key={link.name}
                 href={link.href}
-                onClick={() => setMobileMenuOpen(false)}
-                className="text-[15px] font-medium text-gray-800 hover:text-sky-brand py-1.5 border-b border-gray-50"
+                onClick={(e) => {
+                  setMobileMenuOpen(false);
+                  handleNavClick(e, link.name);
+                }}
+                className={`text-[15px] font-medium py-1.5 border-b border-gray-50 transition-colors ${
+                  currentPage === 'shop' && link.name === 'Shop'
+                    ? 'text-sky-brand'
+                    : 'text-gray-800 hover:text-sky-brand'
+                }`}
               >
                 {link.name}
               </a>
