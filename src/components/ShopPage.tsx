@@ -308,53 +308,128 @@ export function ShopPage({
         </div>
       </section>
 
-      {/* 5. ROOM SELECTION GUIDE */}
-      <section className="ky-guide ky-section ky-container" id="choose" aria-labelledby="ky-guide-title">
-        <div className="ky-heading ky-heading--compact">
-          <p className="ky-eyebrow">FIND YOUR PERFECT FIT</p>
-          <h2 id="ky-guide-title">How to Choose the Right Purifier</h2>
-          <p>Not sure which model is right for you? Here’s a quick guide.</p>
-        </div>
-        <div className="ky-guide__grid">
-          <button
-            type="button"
-            className="ky-guide-card"
-            onClick={() => showProduct(PRODUCTS[0])}
-          >
-            <img src={asset('room-small.webp')} alt="Cozy bedroom" loading="lazy" />
-            <div>
-              <span className="ky-guide-card__title">Small Rooms</span>
-              <span className="ky-guide-card__range">Bedrooms &amp; study rooms</span>
-              <p>Discover compact Kiyoki X3.</p>
-            </div>
-            <Icon name="arrow" size={16} />
-          </button>
-          <button
-            type="button"
-            className="ky-guide-card"
-            onClick={() => showProduct(PRODUCTS[1])}
-          >
-            <img src={asset('room-medium.webp')} alt="Modern family living room" loading="lazy" />
-            <div>
-              <span className="ky-guide-card__title">Medium Rooms</span>
-              <span className="ky-guide-card__range">Family &amp; living spaces</span>
-              <p>Explore versatile Kiyoki X5.</p>
-            </div>
-            <Icon name="arrow" size={16} />
-          </button>
-          <button
-            type="button"
-            className="ky-guide-card"
-            onClick={() => showProduct(PRODUCTS[2])}
-          >
-            <img src={asset('room-large.webp')} alt="Bright open-plan living area" loading="lazy" />
-            <div>
-              <span className="ky-guide-card__title">Large Spaces</span>
-              <span className="ky-guide-card__range">Open living areas</span>
-              <p>Meet powerful Kiyoki X8.</p>
-            </div>
-            <Icon name="arrow" size={16} />
-          </button>
+      {/* 5. ROOM SELECTION GUIDE — High-end luxury architectural cards */}
+      <section className="ky-guide" id="choose" aria-labelledby="ky-guide-title">
+        <div className="ky-guide__container">
+          <div className="ky-guide__header">
+            <p className="ky-eyebrow">FIND YOUR PERFECT FIT</p>
+            <h2 id="ky-guide-title">How to Choose the Right Purifier</h2>
+            <p>Select your room size below to find the ideal Kiyoki air purifier engineered for your space.</p>
+          </div>
+
+          <div className="ky-guide__grid">
+            {[
+              {
+                id: 'small',
+                title: 'Small Rooms',
+                eyebrow: 'BEDROOMS & STUDY',
+                coverage: 'Up to 250 sq. ft.',
+                spaces: 'Bedrooms, nurseries & home offices',
+                description: 'Compact, ultra-quiet continuous filtration designed to maintain pristine air without disturbing sleep or concentration.',
+                specs: ['18 dB Silent Mode', 'True HEPA H13', 'Night Light Mode'],
+                roomImage: 'room-small.webp',
+                purifierThumb: 'product-x3.webp',
+                product: PRODUCTS[0],
+                isPopular: false,
+              },
+              {
+                id: 'medium',
+                title: 'Medium Rooms',
+                eyebrow: 'LIVING & FAMILY SPACES',
+                coverage: 'Up to 450 sq. ft.',
+                spaces: 'Living rooms, master suites & dining areas',
+                description: 'The everyday family workhorse with continuous smart sensing that automatically dials in fresh, purified air.',
+                specs: ['Smart AQI Display', 'Auto Fan Sensor', 'Dual Air Intake'],
+                roomImage: 'room-medium.webp',
+                purifierThumb: 'product-x5.webp',
+                product: PRODUCTS[1],
+                isPopular: true,
+              },
+              {
+                id: 'large',
+                title: 'Large Spaces',
+                eyebrow: 'OPEN-PLAN & EXPANSIVE',
+                coverage: 'Up to 800 sq. ft.',
+                spaces: 'Open-concept living, halls & studio spaces',
+                description: 'High-velocity 360° airflow engine engineered to circulate clean air rapidly across large floorplans and high ceilings.',
+                specs: ['Turbo CADR Engine', '360° Multi-Stage', 'Heavy Duty Filter'],
+                roomImage: 'room-large.webp',
+                purifierThumb: 'product-x8.webp',
+                product: PRODUCTS[2],
+                isPopular: false,
+              },
+            ].map((item) => (
+              <article
+                key={item.id}
+                className="ky-room-card group"
+                onClick={() => showProduct(item.product)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    showProduct(item.product);
+                  }
+                }}
+                tabIndex={0}
+                role="button"
+                aria-label={`View ${item.product.model} for ${item.title}`}
+              >
+                {/* Top Visual Showcase */}
+                <div className="ky-room-card__media">
+                  <img
+                    src={asset(item.roomImage)}
+                    alt={item.title}
+                    className="ky-room-card__img"
+                    loading="lazy"
+                  />
+                  <div className="ky-room-card__scrim" />
+
+                  {/* Floating Badges */}
+                  <div className="ky-room-card__badges">
+                    <span className="ky-room-card__badge-room">{item.coverage}</span>
+                    {item.isPopular && (
+                      <span className="ky-room-card__badge-popular">Most Popular</span>
+                    )}
+                  </div>
+
+                  {/* Floating Recommended Model Preview */}
+                  <div className="ky-room-card__product-chip">
+                    <img src={asset(item.purifierThumb)} alt={item.product.model} />
+                    <div>
+                      <small>Recommended</small>
+                      <strong>{item.product.model}</strong>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Card Body */}
+                <div className="ky-room-card__body">
+                  <span className="ky-room-card__eyebrow">{item.eyebrow}</span>
+                  <h3 className="ky-room-card__title">{item.title}</h3>
+                  <p className="ky-room-card__spaces">{item.spaces}</p>
+                  <p className="ky-room-card__desc">{item.description}</p>
+
+                  {/* Key Spec Pills */}
+                  <div className="ky-room-card__specs">
+                    {item.specs.map((spec) => (
+                      <span key={spec}>{spec}</span>
+                    ))}
+                  </div>
+
+                  {/* Footer Action & Pricing */}
+                  <div className="ky-room-card__footer">
+                    <div className="ky-room-card__price">
+                      <span>Starting at</span>
+                      <strong>{formatINR(item.product.price)}</strong>
+                    </div>
+                    <span className="ky-room-card__btn">
+                      <span>Discover {item.product.model}</span>
+                      <Icon name="arrow" size={15} />
+                    </span>
+                  </div>
+                </div>
+              </article>
+            ))}
+          </div>
         </div>
       </section>
 
