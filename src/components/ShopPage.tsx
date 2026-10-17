@@ -253,39 +253,43 @@ export function ShopPage({
         </div>
       </section>
 
-      {/* 4. TECHNICAL SHOWCASE SECTION */}
-      <section className="ky-technology ky-container" id="technology" aria-labelledby="ky-tech-title">
+      {/* 4. TECHNICAL SHOWCASE SECTION — Full width touching left and right borders */}
+      <section className="ky-technology" id="technology" aria-labelledby="ky-tech-title">
         <div className="ky-technology__hero">
-          <div className="ky-technology__copy">
-            <p className="ky-eyebrow">ADVANCED AIR PURIFICATION</p>
-            <h2 id="ky-tech-title">
-              POWERFUL CLEAN AIR.<br />SMARTER LIVING.
-            </h2>
-            <p>
-              Meet the clean-air technology behind KIYOKI. Designed to help your family breathe more comfortably, every day.
-            </p>
-            <button
-              type="button"
-              className="ky-btn ky-btn--outline"
-              onClick={() => scrollTo('features')}
-            >
-              Learn More <Icon name="arrow" size={17} />
-            </button>
-          </div>
-          <div className="ky-technology__product">
-            <img
-              src={asset('technology-purifier.webp')}
-              alt="Kiyoki purifier with technical airflow illustration"
-              loading="lazy"
-            />
-          </div>
-          <div className="ky-technology__stat">
-            <strong>99.97%</strong>
-            <span>
-              PURER AIR<br />HEALTHIER LIVING
-            </span>
+          <div className="ky-technology__hero-inner">
+            <div className="ky-technology__copy">
+              <p className="ky-eyebrow">ADVANCED AIR PURIFICATION</p>
+              <h2 id="ky-tech-title">
+                POWERFUL CLEAN AIR.<br />SMARTER LIVING.
+              </h2>
+              <p>
+                Meet the clean-air technology behind KIYOKI. Designed to help your family breathe more comfortably, every day.
+              </p>
+              <button
+                type="button"
+                className="ky-btn ky-btn--outline"
+                onClick={() => scrollTo('features')}
+              >
+                Learn More <Icon name="arrow" size={17} />
+              </button>
+            </div>
+            <div className="ky-technology__product">
+              <img
+                src={asset('technology-purifier.webp')}
+                alt="Kiyoki purifier with technical airflow illustration"
+                loading="lazy"
+              />
+            </div>
+            <div className="ky-technology__stat">
+              <strong>99.97%</strong>
+              <span>
+                PURER AIR<br />HEALTHIER LIVING
+              </span>
+            </div>
           </div>
         </div>
+
+        {/* FOUR LARGE FULL-WIDTH FEATURE CARDS MATCHING REFERENCE */}
         <div className="ky-feature-grid" id="features">
           {FEATURES.map((feature) => (
             <article className="ky-feature" key={feature.title}>
@@ -297,9 +301,11 @@ export function ShopPage({
             </article>
           ))}
         </div>
-        <p className="ky-claims-note">
-          *Illustrative feature copy from the design mockup. Verify model-specific specifications before publishing.
-        </p>
+        <div className="ky-claims-note-wrapper">
+          <p className="ky-claims-note">
+            *Illustrative feature copy from the design mockup. Verify model-specific specifications before publishing.
+          </p>
+        </div>
       </section>
 
       {/* 5. ROOM SELECTION GUIDE */}

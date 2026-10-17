@@ -98,26 +98,187 @@
 .ky-product__highlights svg { color: #22262c; flex: 0 0 auto; }
 .ky-product__button { width: 100%; margin-top: auto; }
 
-/* Technology reference: split statement + four neat feature tiles */
-.ky-technology { scroll-margin-top: 18px; margin-top: 2px; }
-.ky-technology__hero { position: relative; display: grid; grid-template-columns: minmax(0, 1.03fr) minmax(0,.83fr) minmax(0,.45fr); align-items: center; min-height: 294px; overflow: hidden; border-radius: 13px; background: radial-gradient(circle at 74% 48%, #e7f5ff 0%, #f7faff 24%, #fff 55%); padding: 26px 32px 22px 34px; }
-.ky-technology__hero::before { content: ''; position: absolute; width: 520px; height: 520px; left: 48%; top: -140px; border-radius: 50%; border: 1px dashed #d7e7f7; pointer-events: none; }
-.ky-technology__copy { position: relative; z-index: 2; }
-.ky-technology__copy h2 { margin-top: 15px; font-size: clamp(28px, 2.65vw, 39px); line-height: 1.075; letter-spacing: -.045em; font-weight: 850; }
-.ky-technology__copy > p:not(.ky-eyebrow) { max-width: 450px; font-size: 14px; color: #666b75; line-height: 1.5; margin-top: 12px; margin-bottom: 18px; }
-.ky-technology__product { width: 100%; position: relative; z-index: 1; max-height: 282px; }
-.ky-technology__product img { height: 282px; width: 100%; object-fit: contain; mix-blend-mode: multiply; }
-.ky-technology__stat { position: relative; z-index: 2; display: flex; flex-direction: column; align-items: flex-start; gap: 4px; }
-.ky-technology__stat strong { font-size: clamp(35px, 3.1vw, 50px); line-height: 1; letter-spacing: -.05em; font-weight: 850; }
-.ky-technology__stat span { color: #0f2750; font-size: clamp(15px, 1.3vw, 20px); line-height: 1.2; font-weight: 800; }
-.ky-feature-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 7px; margin-top: 9px; background: #fdfdfd; border-radius: 10px; }
-.ky-feature { min-width: 0; padding: 0 16px 16px; background: #fff; border-right: 1px solid #e9eaed; }
-.ky-feature:last-child { border: 0; }
-.ky-feature__image { margin: 0 -13px 11px; height: 122px; background: #f5f7fa; border-radius: 9px; overflow: hidden; }
-.ky-feature__image img { height: 100%; width: 100%; object-fit: cover; }
-.ky-feature h3 { font-size: 15px; font-weight: 800; letter-spacing: -.01em; }
-.ky-feature p { margin-top: 7px; max-width: 250px; font-size: 12px; line-height: 1.45; color: #787d86; }
-.ky-claims-note { font-size: 10px; color: #9fa3a9; line-height: 1.5; text-align: right; margin-top: 10px !important; }
+/* Technology section — Full width spanning left-to-right borders */
+.ky-technology {
+  scroll-margin-top: 18px;
+  margin-top: 48px;
+  width: 100%;
+  position: relative;
+  background: #ffffff;
+}
+.ky-technology__hero {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  border-radius: 0;
+  background: radial-gradient(circle at 74% 48%, #e7f5ff 0%, #f7faff 26%, #ffffff 58%);
+  border-top: 1px solid #edf0f5;
+  border-bottom: 1px solid #e5e7eb;
+}
+.ky-technology__hero::before {
+  content: '';
+  position: absolute;
+  width: 600px;
+  height: 600px;
+  left: 48%;
+  top: -150px;
+  border-radius: 50%;
+  border: 1px dashed #d7e7f7;
+  pointer-events: none;
+}
+.ky-technology__hero-inner {
+  max-width: 1380px;
+  margin: 0 auto;
+  padding: 48px clamp(24px, 5vw, 64px) 38px;
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.88fr) minmax(0, 0.45fr);
+  align-items: center;
+  position: relative;
+  z-index: 2;
+}
+.ky-technology__copy {
+  position: relative;
+  z-index: 2;
+}
+.ky-technology__copy h2 {
+  margin-top: 15px;
+  font-size: clamp(28px, 2.65vw, 40px);
+  line-height: 1.08;
+  letter-spacing: -.045em;
+  font-weight: 850;
+  color: #0f172a;
+}
+.ky-technology__copy > p:not(.ky-eyebrow) {
+  max-width: 450px;
+  font-size: 14px;
+  color: #64748b;
+  line-height: 1.55;
+  margin-top: 12px;
+  margin-bottom: 22px;
+}
+.ky-technology__product {
+  width: 100%;
+  position: relative;
+  z-index: 1;
+  max-height: 300px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.ky-technology__product img {
+  height: 290px;
+  width: 100%;
+  object-fit: contain;
+  mix-blend-mode: multiply;
+}
+.ky-technology__stat {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+}
+.ky-technology__stat strong {
+  font-size: clamp(38px, 3.2vw, 54px);
+  line-height: 1;
+  letter-spacing: -.05em;
+  font-weight: 850;
+  color: #0f172a;
+}
+.ky-technology__stat span {
+  color: #0f2750;
+  font-size: clamp(15px, 1.3vw, 20px);
+  line-height: 1.2;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+}
+
+/* Four large feature cards matching the reference layout */
+.ky-feature-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  width: 100%;
+  margin: 0;
+  background: #ffffff;
+  border-bottom: 1px solid #e5e7eb;
+  border-radius: 0;
+  gap: 0;
+}
+.ky-feature {
+  min-width: 0;
+  background: #ffffff;
+  border-right: 1px solid #e5e7eb;
+  padding: 56px 36px 52px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  min-height: 440px;
+  position: relative;
+  transition: background 0.25s ease;
+}
+.ky-feature:last-child {
+  border-right: none;
+}
+.ky-feature:hover {
+  background: #fafcfe;
+}
+.ky-feature__image {
+  width: 100%;
+  height: 220px;
+  margin: 0 0 32px 0;
+  background: transparent;
+  border-radius: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+.ky-feature__image img {
+  max-height: 100%;
+  max-width: 100%;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  filter: drop-shadow(0 6px 16px rgba(0, 0, 0, 0.05));
+}
+.ky-feature:hover .ky-feature__image img {
+  transform: scale(1.06);
+}
+.ky-feature h3 {
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: #0f172a;
+  margin: 0;
+  line-height: 1.35;
+  text-align: center;
+}
+.ky-feature p {
+  margin-top: 12px;
+  font-size: 13px;
+  line-height: 1.55;
+  color: #64748b;
+  max-width: 280px;
+  margin-inline: auto;
+  text-align: center;
+}
+.ky-claims-note-wrapper {
+  width: 100%;
+  background: #ffffff;
+  padding: 14px clamp(24px, 5vw, 64px) 0;
+}
+.ky-claims-note {
+  max-width: 1380px;
+  margin: 0 auto;
+  font-size: 11px;
+  color: #94a3b8;
+  line-height: 1.5;
+  text-align: right;
+}
 
 /* Room selector */
 .ky-guide { padding-top: 52px; padding-bottom: 40px; }
@@ -228,7 +389,6 @@
   .ky-product__body { padding: 22px 19px; }
   .ky-product__topline > span { display: none; }
   .ky-product__highlights div { font-size: 11px; }
-  .ky-feature__image { height: 110px; }
   .ky-guide-card > svg { display: none; }
   .ky-footer__grid { gap: 18px; }
 }
@@ -256,13 +416,16 @@
   .ky-product__price strong { font-size: 24px; }
   .ky-product__highlights div { font-size: 11px; gap: 7px; }
   .ky-product__highlights svg { width: 15px; }
-  .ky-technology__hero { grid-template-columns: 1fr .75fr; }
-  .ky-technology__stat { grid-column: 2; position: absolute; right: 18px; bottom: 12px; background: rgba(255,255,255,.8); border-radius: 7px; padding: 9px; }
-  .ky-technology__stat strong { font-size: 25px; }
+  .ky-technology__hero-inner { grid-template-columns: 1fr .75fr; padding: 40px 24px; }
+  .ky-technology__stat { grid-column: 2; position: absolute; right: 24px; bottom: 20px; background: rgba(255,255,255,.9); backdrop-filter: blur(8px); border-radius: 8px; padding: 10px 14px; border: 1px solid rgba(229,231,235,.8); }
+  .ky-technology__stat strong { font-size: 28px; }
   .ky-technology__stat span { font-size: 11px; }
-  .ky-technology__product img { height: 265px; }
-  .ky-feature-grid { grid-template-columns: repeat(2,1fr); gap: 16px; }
-  .ky-feature { border: 1px solid #f0f0f2; border-radius: 10px; padding-bottom: 20px; }
+  .ky-technology__product img { height: 260px; }
+  .ky-feature-grid { grid-template-columns: repeat(2, 1fr); border-top: 1px solid #e5e7eb; border-bottom: 1px solid #e5e7eb; }
+  .ky-feature { min-height: 380px; padding: 44px 24px 38px; border-right: 1px solid #e5e7eb; border-bottom: 1px solid #e5e7eb; }
+  .ky-feature:nth-child(2n) { border-right: none; }
+  .ky-feature:nth-child(3), .ky-feature:nth-child(4) { border-bottom: none; }
+  .ky-feature__image { height: 200px; margin-bottom: 24px; }
   .ky-guide__grid { grid-template-columns: 1fr; gap: 13px; }
   .ky-guide-card img { height: 110px; flex: 0 0 32%; width: 32%; }
   .ky-footer__grid { grid-template-columns: 1.5fr 1fr 1fr; gap: 28px; }
@@ -295,18 +458,19 @@
   .ky-product__highlights div { font-size: 12px; }
   .ky-product__highlights svg { width: 19px; }
   .ky-product__button { margin-top: 5px; }
-  .ky-technology { margin-top: 20px; }
-  .ky-technology__hero { grid-template-columns: 1fr; min-height: 0; padding: 30px 23px 20px; }
-  .ky-technology__copy h2 { font-size: 30px; }
-  .ky-technology__copy > p:not(.ky-eyebrow) { max-width: 450px; }
-  .ky-technology__product { margin-top: 16px; }
-  .ky-technology__product img { height: 245px; }
-  .ky-technology__stat { right: 12px; bottom: 16px; }
-  .ky-feature-grid { gap: 8px; }
-  .ky-feature { padding: 0 9px 14px; }
-  .ky-feature__image { margin: 0 -8px 11px; height: 97px; }
-  .ky-feature h3 { font-size: 12px; }
-  .ky-feature p { font-size: 11px; }
+  .ky-technology { margin-top: 28px; }
+  .ky-technology__hero-inner { grid-template-columns: 1fr; padding: 36px 20px 24px; }
+  .ky-technology__copy h2 { font-size: 28px; }
+  .ky-technology__copy > p:not(.ky-eyebrow) { max-width: 100%; }
+  .ky-technology__product { margin-top: 20px; }
+  .ky-technology__product img { height: 230px; }
+  .ky-technology__stat { position: static; margin-top: 16px; background: rgba(255,255,255,.9); border-radius: 8px; padding: 10px 14px; width: fit-content; border: 1px solid #e5e7eb; }
+  .ky-feature-grid { grid-template-columns: 1fr; border-top: 1px solid #e5e7eb; border-bottom: 1px solid #e5e7eb; }
+  .ky-feature { border-right: none; border-bottom: 1px solid #e5e7eb; min-height: 350px; padding: 40px 20px 34px; }
+  .ky-feature:last-child { border-bottom: none; }
+  .ky-feature__image { height: 185px; margin-bottom: 22px; }
+  .ky-feature h3 { font-size: 14px; }
+  .ky-feature p { font-size: 12.5px; }
   .ky-guide { padding-top: 45px; }
   .ky-guide-card img { flex-basis: 35%; width: 35%; }
   .ky-footer { padding-top: 32px; }
