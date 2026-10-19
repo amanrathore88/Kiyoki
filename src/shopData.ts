@@ -68,6 +68,7 @@ export interface Product {
   model: string;
   fullTitle: string;
   subtitle: string;
+  cardSubtitle?: string;
   price: number;
   originalPrice: number;
   discount: string;
@@ -138,6 +139,7 @@ export const PRODUCTS: Product[] = [
     model: 'Kiyoki X3',
     fullTitle: 'Kiyoki X3 - The Ultimate Clean Air System for Restful Living',
     subtitle: 'Shield Yourself from Dust, Pollution, Bacteria and Micro-Allergens',
+    cardSubtitle: 'Whisper-quiet air purification for peaceful rest and compact spaces',
     price: 14990,
     originalPrice: 24990,
     discount: '40% OFF',
@@ -155,7 +157,7 @@ export const PRODUCTS: Product[] = [
       { src: 'room-small.webp', alt: 'Kiyoki X3 on modern nightstand', label: 'Room Setup' },
       { src: 'detail-panel.png', alt: 'Kiyoki X3 smart touch control panel', label: 'Touch Panel' },
     ],
-    highlights: ['Ideal for bedrooms & small rooms', 'Ultra-quiet 22 dB performance', 'True HEPA H13 filtration'],
+    highlights: ['250 m³/h Clean Air Delivery (CADR)', 'Ultra-quiet 22 dB night operation', 'Medical-grade True HEPA H13 filtration'],
     description: 'A whisper-quiet compact purifier precision-engineered for restful sleep, nursery care, and private workspaces.',
     cadr: '250 m³/h',
     coverage: 'Up to 320 sq.ft (30 m²)',
@@ -381,6 +383,7 @@ export const PRODUCTS: Product[] = [
     model: 'Kiyoki X5',
     fullTitle: 'Kiyoki X5 - The Intelligent Whole-Home Clean Air Sanctuary',
     subtitle: 'Balanced High-Flow Purification Designed for Living Spaces & Family Rooms',
+    cardSubtitle: 'Balanced high-performance air purification for family living',
     price: 18990,
     originalPrice: 29990,
     discount: '37% OFF',
@@ -398,7 +401,7 @@ export const PRODUCTS: Product[] = [
       { src: 'room-medium.webp', alt: 'Kiyoki X5 in stylish apartment', label: 'Room Setting' },
       { src: 'filtration_exploded_graphic.png', alt: 'Kiyoki X5 5-stage filtration exploded render', label: 'Exploded Core' },
     ],
-    highlights: ['Ideal for medium-sized rooms', 'Smart WiFi & air quality indicator', 'Dual H13 True HEPA filters'],
+    highlights: ['450 m³/h High Airflow Delivery (CADR)', 'Laser PM2.5 monitor & smart control', 'Dual True HEPA H13 composite filters'],
     description: 'Our most balanced, top-selling air purifier featuring high clean-air throughput, smart smartphone app connectivity, and dual-intake filtration.',
     cadr: '450 m³/h',
     coverage: 'Up to 550 sq.ft (51 m²)',
@@ -600,6 +603,7 @@ export const PRODUCTS: Product[] = [
     model: 'Kiyoki X8',
     fullTitle: 'Kiyoki X8 - The Heavy-Duty Flagship Commercial & Luxury Villa Purifier',
     subtitle: 'Massive 650 m³/h Clean Air Capacity for Expansive Living Rooms, Offices & Lofts',
+    cardSubtitle: 'High-capacity air sanitation for spacious rooms and open-plan lofts',
     price: 24990,
     originalPrice: 38990,
     discount: '36% OFF',
@@ -617,7 +621,7 @@ export const PRODUCTS: Product[] = [
       { src: 'room-large.webp', alt: 'Kiyoki X8 in expansive open plan hall', label: 'Great Room' },
       { src: 'product_pro_office.jpg', alt: 'Kiyoki X8 in corporate conference office', label: 'Office Suite' },
     ],
-    highlights: ['Ideal for large rooms & open spaces', 'High 650 m³/h CADR for rapid purification', 'Industrial H13 True HEPA filter'],
+    highlights: ['650 m³/h Maximum Delivery (CADR)', 'Rapid continuous purification for large spaces', 'Heavy-duty True HEPA H13 core filter'],
     description: 'Our top-tier flagship purifier designed for high-ceiling villas, luxury suites, and corporate boardrooms requiring uncompromising high-volume air sanitation.',
     cadr: '650 m³/h',
     coverage: 'Up to 850 sq.ft (80 m²)',

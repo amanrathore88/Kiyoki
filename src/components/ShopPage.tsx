@@ -91,9 +91,6 @@ function ModernProductCard({ product, asset, onOpen }: ModernProductCardProps) {
     setIsFavorited((prev) => !prev);
   };
 
-  const badgeIcon: IconName =
-    product.id === 'x3' ? 'bed' : product.id === 'x5' ? 'crown' : 'building';
-
   return (
     <article
       className="ky-mod-card"
@@ -111,14 +108,8 @@ function ModernProductCard({ product, asset, onOpen }: ModernProductCardProps) {
       }}
       aria-label={`${product.model} air purifier`}
     >
-      {/* 1. Media Stage with Inset Rounded Frame */}
+      {/* 1. Media Stage with Inset Rounded Frame (Uncluttered, No Top Badge) */}
       <div className="ky-mod-card__media">
-        {/* Floating Top-Left Category Badge */}
-        <span className="ky-mod-card__badge">
-          <Icon name={badgeIcon} size={14} strokeWidth={2} />
-          <span>{product.badge}</span>
-        </span>
-
         {/* Floating Top-Right Wishlist Heart Button */}
         <button
           type="button"
@@ -191,35 +182,34 @@ function ModernProductCard({ product, asset, onOpen }: ModernProductCardProps) {
         )}
       </div>
 
-      {/* 2. Card Body Content */}
+      {/* 2. Card Body Content (Clean, Organized, Minimalist) */}
       <div className="ky-mod-card__body">
-        {/* Model Title & Room Pill */}
+        {/* Model Title: Clean and Prominent */}
         <div className="ky-mod-card__header">
           <h3 className="ky-mod-card__title">{product.model}</h3>
-          <span className="ky-mod-card__room-tag">{product.room}</span>
         </div>
 
-        {/* Subtitle */}
-        <p className="ky-mod-card__subtitle">{product.subtitle}</p>
+        {/* Clean Subtitle */}
+        <p className="ky-mod-card__subtitle">{product.cardSubtitle || product.subtitle}</p>
 
-        {/* Key Product Details / Highlights */}
+        {/* Key Product Details / Highlights (Airy, Unboxed, Distinct) */}
         <div className="ky-mod-card__specs">
           {product.highlights.map((highlight, index) => {
             const specIcon: IconName =
               index === 0
-                ? 'house'
+                ? 'wind'
                 : index === 1
-                ? product.id === 'x5'
+                ? product.id === 'x3'
+                  ? 'volume'
+                  : product.id === 'x5'
                   ? 'wifi'
-                  : product.id === 'x8'
-                  ? 'wind'
-                  : 'volume'
+                  : 'wind'
                 : 'filter';
 
             return (
               <div key={highlight} className="ky-mod-card__spec-item">
                 <span className="ky-mod-card__spec-icon">
-                  <Icon name={specIcon} size={14} strokeWidth={2} />
+                  <Icon name={specIcon} size={15} strokeWidth={2} />
                 </span>
                 <span className="ky-mod-card__spec-text">{highlight}</span>
               </div>
