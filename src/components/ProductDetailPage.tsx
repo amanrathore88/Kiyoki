@@ -251,91 +251,94 @@ export function ProductDetailPage({
       </nav>
 
       {/* 2. MAIN TWO-COLUMN CONTAINER: STICKY GALLERY (LEFT) + CONTINUOUS SCROLLING DETAILS (RIGHT) */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-16">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-start relative">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-16">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 relative">
           
-          {/* LEFT COLUMN: MULTI-IMAGE GALLERY (Fixed/Sticky alongside all right column content!) */}
-          <div className="lg:col-span-6 ky-product-gallery-sticky flex flex-col-reverse sm:flex-row gap-4">
-            {/* Vertical Thumbnail Strip */}
-            <div className="flex sm:flex-col gap-2.5 overflow-x-auto sm:overflow-y-auto max-h-[500px] pb-2 sm:pb-0 scrollbar-none">
-              {product.galleryThumbnails.map((item, idx) => (
-                <button
-                  key={idx}
-                  onClick={() => setActiveImageIndex(idx)}
-                  className={`relative flex-shrink-0 w-16 h-16 sm:w-20 sm:h-20 rounded-2xl overflow-hidden border-2 transition-all p-1.5 bg-white ${
-                    idx === activeImageIndex
-                      ? 'border-slate-900 shadow-md scale-105'
-                      : 'border-slate-200 opacity-70 hover:opacity-100 hover:border-slate-400'
-                  }`}
-                  aria-label={`View ${item.label}`}
-                >
-                  <img
-                    src={`/images/${item.src}`}
-                    alt={item.alt}
-                    className="w-full h-full object-contain"
-                  />
-                </button>
-              ))}
-            </div>
-
-            {/* Large Main Stage Image View */}
-            <div className="relative flex-1 bg-white rounded-3xl border border-slate-200 shadow-sm p-6 sm:p-8 flex items-center justify-center min-h-[400px] sm:h-[500px] max-h-[calc(100vh-175px)] group overflow-hidden">
-              {/* 30-Day Money-Back Guarantee Seal at Top Right */}
-              <div className="absolute top-5 right-5 z-10 pointer-events-none">
-                <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full border-2 border-dashed border-slate-900 flex flex-col items-center justify-center bg-white/95 backdrop-blur-sm p-1.5 text-center shadow-sm">
-                  <span className="text-[9px] uppercase tracking-wider font-extrabold text-slate-500 leading-none">
-                    MONEY BACK
-                  </span>
-                  <span className="text-sm sm:text-base font-black text-slate-900 leading-tight">
-                    30
-                  </span>
-                  <span className="text-[9px] uppercase tracking-wider font-extrabold text-slate-500 leading-none">
-                    DAYS
-                  </span>
-                </div>
-              </div>
-
-              {/* Prev Image Arrow */}
-              <button
-                onClick={handlePrevImage}
-                className="absolute left-4 z-10 w-10 h-10 rounded-full bg-white/90 hover:bg-white text-slate-900 shadow-md flex items-center justify-center border border-slate-200 transition-all opacity-80 group-hover:opacity-100 hover:scale-105"
-                aria-label="Previous photo"
-              >
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                </svg>
-              </button>
-
-              {/* Main Photo Display */}
-              <img
-                src={`/images/${product.galleryThumbnails[activeImageIndex]?.src || product.image}`}
-                alt={product.galleryThumbnails[activeImageIndex]?.alt || product.model}
-                className="max-h-[460px] w-auto max-w-full object-contain transition-all duration-300 transform group-hover:scale-[1.02]"
-              />
-
-              {/* Next Image Arrow */}
-              <button
-                onClick={handleNextImage}
-                className="absolute right-4 z-10 w-10 h-10 rounded-full bg-white/90 hover:bg-white text-slate-900 shadow-md flex items-center justify-center border border-slate-200 transition-all opacity-80 group-hover:opacity-100 hover:scale-105"
-                aria-label="Next photo"
-              >
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              </button>
-
-              {/* Bottom Dots Indicator */}
-              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-1.5 bg-black/20 backdrop-blur-md px-3 py-1.5 rounded-full">
-                {product.galleryThumbnails.map((_, idx) => (
+          {/* LEFT COLUMN: Outer container stretches the full height of the entire right column */}
+          <div className="lg:col-span-6 relative">
+            {/* STICKY GALLERY INNER WRAPPER: Stays fixed/pinned in viewport as user scrolls through the right column */}
+            <div className="ky-product-gallery-sticky lg:sticky lg:top-[144px] z-20 flex flex-col-reverse sm:flex-row gap-4">
+              {/* Vertical Thumbnail Strip */}
+              <div className="flex sm:flex-col gap-2.5 overflow-x-auto sm:overflow-y-auto max-h-[500px] pb-2 sm:pb-0 scrollbar-none">
+                {product.galleryThumbnails.map((item, idx) => (
                   <button
                     key={idx}
                     onClick={() => setActiveImageIndex(idx)}
-                    className={`h-2 rounded-full transition-all ${
-                      idx === activeImageIndex ? 'w-6 bg-white' : 'w-2 bg-white/50'
+                    className={`relative flex-shrink-0 w-16 h-16 sm:w-20 sm:h-20 rounded-2xl overflow-hidden border-2 transition-all p-1.5 bg-white ${
+                      idx === activeImageIndex
+                        ? 'border-slate-900 shadow-md scale-105'
+                        : 'border-slate-200 opacity-70 hover:opacity-100 hover:border-slate-400'
                     }`}
-                    aria-label={`Go to slide ${idx + 1}`}
-                  />
+                    aria-label={`View ${item.label}`}
+                  >
+                    <img
+                      src={`/images/${item.src}`}
+                      alt={item.alt}
+                      className="w-full h-full object-contain"
+                    />
+                  </button>
                 ))}
+              </div>
+
+              {/* Large Main Stage Image View */}
+              <div className="relative flex-1 bg-white rounded-3xl border border-slate-200 shadow-sm p-6 sm:p-8 flex items-center justify-center min-h-[400px] sm:h-[500px] max-h-[calc(100vh-175px)] group overflow-hidden">
+                {/* 30-Day Money-Back Guarantee Seal at Top Right */}
+                <div className="absolute top-5 right-5 z-10 pointer-events-none">
+                  <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full border-2 border-dashed border-slate-900 flex flex-col items-center justify-center bg-white/95 backdrop-blur-sm p-1.5 text-center shadow-sm">
+                    <span className="text-[9px] uppercase tracking-wider font-extrabold text-slate-500 leading-none">
+                      MONEY BACK
+                    </span>
+                    <span className="text-sm sm:text-base font-black text-slate-900 leading-tight">
+                      30
+                    </span>
+                    <span className="text-[9px] uppercase tracking-wider font-extrabold text-slate-500 leading-none">
+                      DAYS
+                    </span>
+                  </div>
+                </div>
+
+                {/* Prev Image Arrow */}
+                <button
+                  onClick={handlePrevImage}
+                  className="absolute left-4 z-10 w-10 h-10 rounded-full bg-white/90 hover:bg-white text-slate-900 shadow-md flex items-center justify-center border border-slate-200 transition-all opacity-80 group-hover:opacity-100 hover:scale-105"
+                  aria-label="Previous photo"
+                >
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                  </svg>
+                </button>
+
+                {/* Main Photo Display */}
+                <img
+                  src={`/images/${product.galleryThumbnails[activeImageIndex]?.src || product.image}`}
+                  alt={product.galleryThumbnails[activeImageIndex]?.alt || product.model}
+                  className="max-h-[460px] w-auto max-w-full object-contain transition-all duration-300 transform group-hover:scale-[1.02]"
+                />
+
+                {/* Next Image Arrow */}
+                <button
+                  onClick={handleNextImage}
+                  className="absolute right-4 z-10 w-10 h-10 rounded-full bg-white/90 hover:bg-white text-slate-900 shadow-md flex items-center justify-center border border-slate-200 transition-all opacity-80 group-hover:opacity-100 hover:scale-105"
+                  aria-label="Next photo"
+                >
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                </button>
+
+                {/* Bottom Dots Indicator */}
+                <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-1.5 bg-black/20 backdrop-blur-md px-3 py-1.5 rounded-full">
+                  {product.galleryThumbnails.map((_, idx) => (
+                    <button
+                      key={idx}
+                      onClick={() => setActiveImageIndex(idx)}
+                      className={`h-2 rounded-full transition-all ${
+                        idx === activeImageIndex ? 'w-6 bg-white' : 'w-2 bg-white/50'
+                      }`}
+                      aria-label={`Go to slide ${idx + 1}`}
+                    />
+                  ))}
+                </div>
               </div>
             </div>
           </div>
@@ -1054,7 +1057,7 @@ export function ProductDetailPage({
             ))}
           </div>
         </section>
-      </main>
+      </div>
 
       {/* 7. STICKY FLOATING BOTTOM BAR (REVEALS AS YOU SCROLL PAST BUY BOX, EXACTLY AS IN REFERENCE SITES) */}
       <div
