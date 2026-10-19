@@ -161,7 +161,7 @@ export function ProductDetailPage({
   return (
     <div className="w-full bg-white text-slate-900 min-h-screen font-sans selection:bg-sky-100 selection:text-slate-900">
       {/* 1. TOP BREADCRUMB & STICKY SUB-NAVIGATION */}
-      <nav aria-label="Breadcrumb and page tabs" className="sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b border-slate-200 shadow-sm">
+      <nav aria-label="Breadcrumb and page tabs" className="ky-product-subnav-sticky bg-white/95 backdrop-blur-md border-b border-slate-200 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex flex-wrap items-center justify-between gap-4">
           {/* Breadcrumb & Back to Shop */}
           <div className="flex items-center gap-2 text-sm text-slate-500">
@@ -252,12 +252,12 @@ export function ProductDetailPage({
 
       {/* 2. MAIN TWO-COLUMN CONTAINER: STICKY GALLERY (LEFT) + CONTINUOUS SCROLLING DETAILS (RIGHT) */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-16">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-start relative">
           
-          {/* LEFT COLUMN: MULTI-IMAGE GALLERY (Sticky alongside all right column content!) */}
-          <div className="lg:col-span-6 lg:sticky lg:top-20 self-start flex flex-col-reverse sm:flex-row gap-4">
+          {/* LEFT COLUMN: MULTI-IMAGE GALLERY (Fixed/Sticky alongside all right column content!) */}
+          <div className="lg:col-span-6 ky-product-gallery-sticky flex flex-col-reverse sm:flex-row gap-4">
             {/* Vertical Thumbnail Strip */}
-            <div className="flex sm:flex-col gap-3 overflow-x-auto sm:overflow-y-auto max-h-[580px] pb-2 sm:pb-0 scrollbar-none">
+            <div className="flex sm:flex-col gap-2.5 overflow-x-auto sm:overflow-y-auto max-h-[500px] pb-2 sm:pb-0 scrollbar-none">
               {product.galleryThumbnails.map((item, idx) => (
                 <button
                   key={idx}
@@ -279,7 +279,7 @@ export function ProductDetailPage({
             </div>
 
             {/* Large Main Stage Image View */}
-            <div className="relative flex-1 bg-white rounded-3xl border border-slate-200 shadow-sm p-6 sm:p-8 flex items-center justify-center min-h-[440px] sm:min-h-[540px] group overflow-hidden">
+            <div className="relative flex-1 bg-white rounded-3xl border border-slate-200 shadow-sm p-6 sm:p-8 flex items-center justify-center min-h-[400px] sm:h-[500px] max-h-[calc(100vh-175px)] group overflow-hidden">
               {/* 30-Day Money-Back Guarantee Seal at Top Right */}
               <div className="absolute top-5 right-5 z-10 pointer-events-none">
                 <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full border-2 border-dashed border-slate-900 flex flex-col items-center justify-center bg-white/95 backdrop-blur-sm p-1.5 text-center shadow-sm">

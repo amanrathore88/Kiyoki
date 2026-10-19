@@ -233,7 +233,7 @@ export function App() {
   };
 
   return (
-    <div className="w-full bg-white text-gray-900 font-sans selection:bg-sky-brand selection:text-white flex flex-col overflow-x-hidden min-h-screen">
+    <div className="w-full bg-white text-gray-900 font-sans selection:bg-sky-brand selection:text-white flex flex-col overflow-x-clip min-h-screen">
       {/* 01. GLOBAL HEADER / NAVIGATION (88px) */}
       <Header
         onOpenSearch={() => setIsSearchOpen(true)}
