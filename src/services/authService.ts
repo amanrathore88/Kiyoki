@@ -852,3 +852,51 @@ export function deleteCustomer(userId: string): boolean {
   );
   return true;
 }
+
+export function createCustomerByAdmin(customerData: {
+  name: string;
+  email: string;
+  provider?: AuthProvider;
+  role?: UserRole;
+}): { success: boolean; error?: string; user?: User } {
+  const email = customerData.email.trim().toLowerCase();
+  const name = customerData.name.trim();
+
+  if (!email || !email.includes('@')) {
+    return { success: false, error: 'Please enter a valid email address.' };
+  }
+  if (!name || name.length < 2) {
+    return { success: false, error: 'Name must be at least 2 characters.' };
+  }
+
+  const users = getStoredUsers();
+  if (users.some((u) => u.email.toLowerCase() === email)) {
+    return { success: false, error: 'A customer with this email address already exists.' };
+  }
+
+  const newUser: User = {
+    id: 'usr_' + Date.now().toString(36) + '_' + Math.random().toString(36).substring(2, 6),
+    name,
+    email,
+    role: customerData.role || 'user',
+    provider: customerData.provider || 'email',
+    status: 'active',
+    createdAt: new Date().toISOString(),
+    lastLogin: new Date().toISOString(),
+    loginCount: 1,
+    avatarUrl: `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(name)}`,
+  };
+
+  users.unshift(newUser);
+  saveStoredUsers(users);
+
+  addAuditLog(
+    'REGISTER_SUCCESS',
+    newUser.email,
+    `Administrator manually created customer account (${newUser.name}).`,
+    'admin'
+  );
+
+  return { success: true, user: newUser };
+}
+
