@@ -1,19 +1,25 @@
 // ============================================================================
 // KIYOKI SECURE AUTHENTICATION & ACCESS CONTROL SERVICE
 // Enterprise-Grade Security: SHA-256 Hashing, Brute-Force Rate Limiting,
-// Timing-Safe Error Masking, Role-Based Route Guards & Security Audit Logging
+// Timing-Safe Error Masking, Google & Apple OAuth, Role Guards & Customer Directory
 // ============================================================================
 
 export type UserRole = 'admin' | 'user';
+export type AuthProvider = 'email' | 'google' | 'apple';
+export type AccountStatus = 'active' | 'suspended';
 
 export interface User {
   id: string;
   name: string;
   email: string;
-  passwordHash: string;
+  passwordHash?: string;
   role: UserRole;
+  provider: AuthProvider;
+  avatarUrl?: string;
+  status: AccountStatus;
   createdAt: string;
   lastLogin?: string;
+  loginCount: number;
 }
 
 export interface AuthSession {
@@ -23,6 +29,8 @@ export interface AuthSession {
     name: string;
     email: string;
     role: UserRole;
+    provider?: AuthProvider;
+    avatarUrl?: string;
   };
   createdAt: number;
   expiresAt: number;
@@ -151,7 +159,15 @@ export function validatePassword(password: string): PasswordValidationResult {
 function getStoredUsers(): User[] {
   try {
     const data = localStorage.getItem(STORAGE_KEYS.USERS);
-    return data ? JSON.parse(data) : [];
+    if (!data) return [];
+    const parsed: User[] = JSON.parse(data);
+    // Ensure all backwards-compatible defaults are present
+    return parsed.map((u) => ({
+      ...u,
+      provider: u.provider || 'email',
+      status: u.status || 'active',
+      loginCount: u.loginCount || 1,
+    }));
   } catch {
     return [];
   }
@@ -248,7 +264,11 @@ export async function initializeAuth(): Promise<void> {
       email: 'admin@kiyoki.com',
       passwordHash: adminHash,
       role: 'admin',
+      provider: 'email',
+      status: 'active',
       createdAt: new Date().toISOString(),
+      lastLogin: new Date().toISOString(),
+      loginCount: 5,
     });
   }
 
@@ -260,7 +280,11 @@ export async function initializeAuth(): Promise<void> {
       email: 'user@kiyoki.com',
       passwordHash: userHash,
       role: 'user',
+      provider: 'email',
+      status: 'active',
       createdAt: new Date().toISOString(),
+      lastLogin: new Date().toISOString(),
+      loginCount: 3,
     });
   }
 
@@ -426,11 +450,20 @@ export async function login(emailRaw: string, passwordRaw: string): Promise<Logi
     };
   }
 
+  // Check if account has been suspended by Admin
+  if (user.status === 'suspended') {
+    return {
+      success: false,
+      error: 'Access Denied: This account has been suspended by an administrator. Please contact support.',
+    };
+  }
+
   // 3. Login successful! Reset rate limiting
   resetLockout(email);
 
-  // 4. Update last login timestamp
+  // 4. Update customer stats (last login timestamp & login count)
   user.lastLogin = new Date().toISOString();
+  user.loginCount = (user.loginCount || 0) + 1;
   saveStoredUsers(users);
 
   // 5. Create secure session
@@ -441,6 +474,8 @@ export async function login(emailRaw: string, passwordRaw: string): Promise<Logi
       name: user.name,
       email: user.email,
       role: user.role,
+      provider: user.provider || 'email',
+      avatarUrl: user.avatarUrl,
     },
     createdAt: Date.now(),
     expiresAt: Date.now() + SESSION_DURATION_MS,
@@ -455,7 +490,7 @@ export async function login(emailRaw: string, passwordRaw: string): Promise<Logi
   addAuditLog(
     'LOGIN_SUCCESS',
     user.email,
-    `Successfully authenticated. Role: ${user.role}. Session created.`,
+    `Successfully authenticated. Role: ${user.role}. (Login count: ${user.loginCount})`,
     user.role
   );
 
@@ -467,7 +502,7 @@ export async function login(emailRaw: string, passwordRaw: string): Promise<Logi
 }
 
 // ----------------------------------------------------------------------------
-// Core Authentication: Register
+// Core Authentication: Register via Email
 // ----------------------------------------------------------------------------
 export interface RegisterResult {
   success: boolean;
@@ -529,8 +564,11 @@ export async function register(
     email,
     passwordHash,
     role: 'user', // New public registrations are strictly 'user' role
+    provider: 'email',
+    status: 'active',
     createdAt: new Date().toISOString(),
     lastLogin: new Date().toISOString(),
+    loginCount: 1,
   };
 
   users.push(newUser);
@@ -544,6 +582,7 @@ export async function register(
       name: newUser.name,
       email: newUser.email,
       role: newUser.role,
+      provider: 'email',
     },
     createdAt: Date.now(),
     expiresAt: Date.now() + SESSION_DURATION_MS,
@@ -558,7 +597,7 @@ export async function register(
   addAuditLog(
     'REGISTER_SUCCESS',
     newUser.email,
-    'User successfully registered new account.',
+    'User successfully registered new account via email.',
     'user'
   );
 
@@ -567,4 +606,212 @@ export async function register(
     user: session.user,
     session,
   };
+}
+
+// ----------------------------------------------------------------------------
+// Social Authentication: Sign In / Sign Up with Google
+// ----------------------------------------------------------------------------
+export async function signInWithGoogle(profile?: {
+  name: string;
+  email: string;
+  avatarUrl?: string;
+}): Promise<LoginResult> {
+  const email = (profile?.email || 'alex.morgan.tech@gmail.com').trim().toLowerCase();
+  const name = profile?.name || 'Alex Morgan';
+  const avatarUrl =
+    profile?.avatarUrl ||
+    'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=120&auto=format&fit=crop&q=80';
+
+  await initializeAuth();
+  const users = getStoredUsers();
+  let user = users.find((u) => u.email.toLowerCase() === email);
+
+  if (user) {
+    if (user.status === 'suspended') {
+      return {
+        success: false,
+        error: 'Access Denied: This account has been suspended by an administrator.',
+      };
+    }
+    user.lastLogin = new Date().toISOString();
+    user.loginCount = (user.loginCount || 0) + 1;
+    if (!user.avatarUrl && avatarUrl) user.avatarUrl = avatarUrl;
+    saveStoredUsers(users);
+
+    addAuditLog(
+      'LOGIN_SUCCESS',
+      user.email,
+      `User authenticated via Google OAuth. (Login count: ${user.loginCount})`,
+      user.role
+    );
+  } else {
+    // Create new customer account via Google
+    user = {
+      id: 'usr_g_' + Date.now().toString(36) + '_' + Math.random().toString(36).substring(2, 6),
+      name,
+      email,
+      role: 'user',
+      provider: 'google',
+      avatarUrl,
+      status: 'active',
+      createdAt: new Date().toISOString(),
+      lastLogin: new Date().toISOString(),
+      loginCount: 1,
+    };
+    users.push(user);
+    saveStoredUsers(users);
+
+    addAuditLog(
+      'REGISTER_SUCCESS',
+      user.email,
+      'New customer signed up via Google OAuth.',
+      'user'
+    );
+  }
+
+  const session: AuthSession = {
+    token: generateSecureToken(),
+    user: {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      provider: user.provider,
+      avatarUrl: user.avatarUrl,
+    },
+    createdAt: Date.now(),
+    expiresAt: Date.now() + SESSION_DURATION_MS,
+  };
+
+  try {
+    localStorage.setItem(STORAGE_KEYS.SESSION, JSON.stringify(session));
+  } catch {
+    // Ignore
+  }
+
+  return {
+    success: true,
+    user: session.user,
+    session,
+  };
+}
+
+// ----------------------------------------------------------------------------
+// Social Authentication: Sign In / Sign Up with Apple
+// ----------------------------------------------------------------------------
+export async function signInWithApple(profile?: {
+  name: string;
+  email: string;
+}): Promise<LoginResult> {
+  const email = (profile?.email || 'sarah.connor.apple@icloud.com').trim().toLowerCase();
+  const name = profile?.name || 'Sarah Connor';
+
+  await initializeAuth();
+  const users = getStoredUsers();
+  let user = users.find((u) => u.email.toLowerCase() === email);
+
+  if (user) {
+    if (user.status === 'suspended') {
+      return {
+        success: false,
+        error: 'Access Denied: This account has been suspended by an administrator.',
+      };
+    }
+    user.lastLogin = new Date().toISOString();
+    user.loginCount = (user.loginCount || 0) + 1;
+    saveStoredUsers(users);
+
+    addAuditLog(
+      'LOGIN_SUCCESS',
+      user.email,
+      `User authenticated via Apple ID. (Login count: ${user.loginCount})`,
+      user.role
+    );
+  } else {
+    // Create new customer account via Apple
+    user = {
+      id: 'usr_a_' + Date.now().toString(36) + '_' + Math.random().toString(36).substring(2, 6),
+      name,
+      email,
+      role: 'user',
+      provider: 'apple',
+      status: 'active',
+      createdAt: new Date().toISOString(),
+      lastLogin: new Date().toISOString(),
+      loginCount: 1,
+    };
+    users.push(user);
+    saveStoredUsers(users);
+
+    addAuditLog(
+      'REGISTER_SUCCESS',
+      user.email,
+      'New customer signed up via Apple ID.',
+      'user'
+    );
+  }
+
+  const session: AuthSession = {
+    token: generateSecureToken(),
+    user: {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      provider: user.provider,
+    },
+    createdAt: Date.now(),
+    expiresAt: Date.now() + SESSION_DURATION_MS,
+  };
+
+  try {
+    localStorage.setItem(STORAGE_KEYS.SESSION, JSON.stringify(session));
+  } catch {
+    // Ignore
+  }
+
+  return {
+    success: true,
+    user: session.user,
+    session,
+  };
+}
+
+// ----------------------------------------------------------------------------
+// Customer Directory & Admin Management Helpers
+// ----------------------------------------------------------------------------
+export function getAllCustomers(): User[] {
+  return getStoredUsers();
+}
+
+export function updateCustomerStatus(userId: string, newStatus: AccountStatus): boolean {
+  const users = getStoredUsers();
+  const user = users.find((u) => u.id === userId);
+  if (!user || user.role === 'admin') return false; // Prevent disabling root admin
+
+  user.status = newStatus;
+  saveStoredUsers(users);
+  addAuditLog(
+    'ACCOUNT_LOCKED',
+    user.email,
+    `Admin changed customer account status to '${newStatus}'.`,
+    'admin'
+  );
+  return true;
+}
+
+export function deleteCustomer(userId: string): boolean {
+  const users = getStoredUsers();
+  const target = users.find((u) => u.id === userId);
+  if (!target || target.role === 'admin') return false; // Cannot delete admin
+
+  const updated = users.filter((u) => u.id !== userId);
+  saveStoredUsers(updated);
+  addAuditLog(
+    'LOGOUT',
+    target.email,
+    `Admin deleted customer record from directory (${target.name}).`,
+    'admin'
+  );
+  return true;
 }
