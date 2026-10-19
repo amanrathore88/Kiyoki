@@ -8,8 +8,8 @@ interface HeaderProps {
   onOpenCart: () => void;
   onOpenAuth: () => void;
   cartCount?: number;
-  currentPage?: 'home' | 'shop' | 'admin' | 'account';
-  onNavigate?: (page: 'home' | 'shop' | 'admin' | 'account') => void;
+  currentPage?: 'home' | 'shop' | 'product' | 'admin' | 'account';
+  onNavigate?: (page: 'home' | 'shop' | 'product' | 'admin' | 'account') => void;
   session?: AuthSession | null;
   onLogout?: () => void;
 }

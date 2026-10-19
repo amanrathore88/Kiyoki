@@ -14,8 +14,9 @@ import { ShopPage } from './components/ShopPage';
 import { AuthModal } from './components/AuthModal';
 import { AdminPortal } from './components/AdminPortal';
 import { UserDashboard } from './components/UserDashboard';
+import { ProductDetailPage } from './components/ProductDetailPage';
 import { getCurrentSession, logout, type AuthSession, addAuditLog } from './services/authService';
-import { type Product } from './shopData';
+import { PRODUCTS, type Product } from './shopData';
 
 export function App() {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -25,10 +26,23 @@ export function App() {
   const [session, setSession] = useState<AuthSession | null>(() => getCurrentSession());
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
 
-  // Navigation pages: 'home' | 'shop' | 'admin' | 'account'
-  const [currentPage, setCurrentPage] = useState<'home' | 'shop' | 'admin' | 'account'>(() => {
+  const [selectedProduct, setSelectedProduct] = useState<Product>(() => {
+    const hash = window.location.hash;
+    if (hash.startsWith('#product')) {
+      const parts = hash.split('/');
+      if (parts[1]) {
+        const found = PRODUCTS.find((p) => p.id === parts[1]);
+        if (found) return found;
+      }
+    }
+    return PRODUCTS[0];
+  });
+
+  // Navigation pages: 'home' | 'shop' | 'product' | 'admin' | 'account'
+  const [currentPage, setCurrentPage] = useState<'home' | 'shop' | 'product' | 'admin' | 'account'>(() => {
     const hash = window.location.hash;
     const currentSession = getCurrentSession();
+    if (hash.startsWith('#product')) return 'product';
     if (hash === '#shop') return 'shop';
     if (hash === '#admin') {
       return currentSession?.user.role === 'admin' ? 'admin' : 'home';
@@ -46,7 +60,14 @@ export function App() {
       const currentSession = getCurrentSession();
       setSession(currentSession);
 
-      if (hash === '#shop') {
+      if (hash.startsWith('#product')) {
+        const parts = hash.split('/');
+        if (parts[1]) {
+          const found = PRODUCTS.find((p) => p.id === parts[1]);
+          if (found) setSelectedProduct(found);
+        }
+        setCurrentPage('product');
+      } else if (hash === '#shop') {
         setCurrentPage('shop');
       } else if (hash === '#admin') {
         // Enforce Admin Role Guard
@@ -93,7 +114,7 @@ export function App() {
     return () => window.removeEventListener('hashchange', handleHashChange);
   }, []);
 
-  const handleNavigate = (page: 'home' | 'shop' | 'admin' | 'account') => {
+  const handleNavigate = (page: 'home' | 'shop' | 'product' | 'admin' | 'account') => {
     if (page === 'admin') {
       const currentSession = getCurrentSession();
       if (!currentSession || currentSession.user.role !== 'admin') {
@@ -120,11 +141,22 @@ export function App() {
       setCurrentPage('shop');
       window.location.hash = '#shop';
       window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else if (page === 'product') {
+      setCurrentPage('product');
+      window.location.hash = `#product/${selectedProduct.id}`;
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     } else {
       setCurrentPage('home');
       window.location.hash = '';
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
+  };
+
+  const handleOpenProduct = (product: Product) => {
+    setSelectedProduct(product);
+    setCurrentPage('product');
+    window.location.hash = `#product/${product.id}`;
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleAuthSuccess = (newSession: AuthSession) => {
@@ -174,23 +206,25 @@ export function App() {
     );
   };
 
-  const handleAddProductToCart = (product: Product) => {
+  const handleAddProductToCart = (product: Product, quantity = 1, selectedColor?: string) => {
     setCartItems((prev) => {
-      const existing = prev.find((item) => item.id === product.id || item.name === product.model);
+      const itemKey = selectedColor ? `${product.id}-${selectedColor}` : product.id;
+      const itemName = `${product.model}${selectedColor ? ` (${selectedColor})` : ''}`;
+      const existing = prev.find((item) => item.id === itemKey || item.name === itemName);
       if (existing) {
         return prev.map((item) =>
-          item.id === product.id || item.name === product.model
-            ? { ...item, quantity: item.quantity + 1 }
+          item.id === itemKey || item.name === itemName
+            ? { ...item, quantity: item.quantity + quantity }
             : item
         );
       }
       return [
         ...prev,
         {
-          id: product.id,
-          name: product.model,
+          id: itemKey,
+          name: itemName,
           price: product.price,
-          quantity: 1,
+          quantity: quantity,
           image: `/images/${product.image}`,
         },
       ];
@@ -215,7 +249,7 @@ export function App() {
         onLogout={handleLogout}
       />
 
-      {/* CONDITIONAL CONTENT: ADMIN PORTAL, USER DASHBOARD, SHOP PAGE OR HOME PAGE */}
+      {/* CONDITIONAL CONTENT: ADMIN PORTAL, USER DASHBOARD, PRODUCT DETAIL PAGE, SHOP PAGE OR HOME PAGE */}
       {currentPage === 'admin' ? (
         <main className="w-full">
           <AdminPortal
@@ -233,9 +267,21 @@ export function App() {
             onNavigateShop={() => handleNavigate('shop')}
           />
         </main>
+      ) : currentPage === 'product' && selectedProduct ? (
+        <main className="w-full">
+          <ProductDetailPage
+            product={selectedProduct}
+            onAddToCart={handleAddProductToCart}
+            onNavigateShop={() => handleNavigate('shop')}
+            onSelectProduct={handleOpenProduct}
+          />
+        </main>
       ) : currentPage === 'shop' ? (
         <main className="w-full">
-          <ShopPage onAddToCart={handleAddProductToCart} />
+          <ShopPage
+            onAddToCart={(p) => handleAddProductToCart(p, 1)}
+            onProductOpen={handleOpenProduct}
+          />
         </main>
       ) : (
         <main className="w-full">
@@ -253,29 +299,19 @@ export function App() {
           {/* SECTION 03: Horizontal Product-Card Carousel (Featured 67% + Secondary 33%) */}
           <ProductCarousel
             onShopClick={(productName) => {
-              setCartItems((prev) => {
-                const existing = prev.find((item) => item.name === productName);
-                if (existing) {
-                  return prev.map((item) =>
-                    item.name === productName
-                      ? { ...item, quantity: item.quantity + 1 }
-                      : item
-                  );
-                }
-                return [
-                  ...prev,
-                  {
-                    id: String(Date.now()),
-                    name: productName,
-                    price: 0,
-                    quantity: 1,
-                    image: '/images/card1_ref_clean.png',
-                  },
-                ];
-              });
-              setIsCartOpen(true);
+              const matched = PRODUCTS.find(
+                (p) =>
+                  p.model.toLowerCase() === productName.toLowerCase() ||
+                  productName.toLowerCase().includes(p.id) ||
+                  p.model.toLowerCase().includes(productName.toLowerCase())
+              );
+              if (matched) {
+                handleOpenProduct(matched);
+              } else {
+                handleNavigate('shop');
+              }
             }}
-            onLearnMoreClick={() => setIsSearchOpen(true)}
+            onLearnMoreClick={() => handleNavigate('shop')}
           />
 
           {/* SECTION 04: Advanced 5-Stage Filtration Technology */}
@@ -286,27 +322,17 @@ export function App() {
           {/* SECTION 05: Meet The Green Team (Interactive Expanding Product Showcase) */}
           <GreenTeamSection
             onShopNowClick={(productName) => {
-              setCartItems((prev) => {
-                const existing = prev.find((item) => item.name === productName);
-                if (existing) {
-                  return prev.map((item) =>
-                    item.name === productName
-                      ? { ...item, quantity: item.quantity + 1 }
-                      : item
-                  );
-                }
-                return [
-                  ...prev,
-                  {
-                    id: String(Date.now()),
-                    name: `Kiyoki ${productName}`,
-                    price: 0,
-                    quantity: 1,
-                    image: `/images/purifier_${productName.toLowerCase()}.png`,
-                  },
-                ];
-              });
-              setIsCartOpen(true);
+              const matched = PRODUCTS.find(
+                (p) =>
+                  p.model.toLowerCase() === productName.toLowerCase() ||
+                  productName.toLowerCase().includes(p.id) ||
+                  p.model.toLowerCase().includes(productName.toLowerCase())
+              );
+              if (matched) {
+                handleOpenProduct(matched);
+              } else {
+                handleNavigate('shop');
+              }
             }}
           />
 

@@ -5,7 +5,7 @@ interface FooterProps {
   onOpenSearch?: () => void;
   onOpenCart?: () => void;
   onOpenAuth?: () => void;
-  onNavigate?: (page: 'home' | 'shop' | 'admin' | 'account') => void;
+  onNavigate?: (page: 'home' | 'shop' | 'product' | 'admin' | 'account') => void;
 }
 
 export const Footer: React.FC<FooterProps> = ({
