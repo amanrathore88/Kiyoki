@@ -27,11 +27,15 @@ export function ProductDetailPage({
   const [activeTab, setActiveTab] = useState<'overview' | 'deep-dive' | 'faqs' | 'reviews'>('overview');
   const [deepDiveSubTab, setDeepDiveSubTab] = useState<'product' | 'specs' | 'reports'>('product');
 
+  // Sticky bottom bar trigger state
+  const [showStickyBottomBar, setShowStickyBottomBar] = useState(false);
+
   // Accordion open states for Deep Dive
   const [openAccordions, setOpenAccordions] = useState<Record<string, boolean>>({
     about: true,
     howItWorks: false,
-    howToUse: false,
+    whoShouldUse: false,
+    additionalDetails: false,
   });
 
   // Modal states
@@ -51,7 +55,7 @@ export function ProductDetailPage({
   const [votedReviews, setVotedReviews] = useState<Record<string, number>>({});
   const [addedToast, setAddedToast] = useState(false);
 
-  // Reset indices when product changes
+  // Reset states when product changes
   useEffect(() => {
     setActiveImageIndex(0);
     setSelectedColor(product.colors[0]?.name || 'Sky Blue');
@@ -59,6 +63,19 @@ export function ProductDetailPage({
     setReviewsList(product.reviews);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, [product]);
+
+  // Track scroll position to reveal bottom sticky bar when scrolling past the main buy box
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 480) {
+        setShowStickyBottomBar(true);
+      } else {
+        setShowStickyBottomBar(false);
+      }
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   const toggleAccordion = (sectionKey: string) => {
     setOpenAccordions((prev) => ({
@@ -142,39 +159,39 @@ export function ProductDetailPage({
   };
 
   return (
-    <div className="w-full bg-[#faf7f2] text-[#1c1c1e] min-h-screen font-sans selection:bg-[#9ec9e8] selection:text-black">
+    <div className="w-full bg-white text-slate-900 min-h-screen font-sans selection:bg-sky-100 selection:text-slate-900">
       {/* 1. TOP BREADCRUMB & STICKY SUB-NAVIGATION */}
-      <nav aria-label="Breadcrumb and page tabs" className="sticky top-0 z-30 bg-[#faf7f2]/95 backdrop-blur-md border-b border-[#ebdcca] shadow-sm">
+      <nav aria-label="Breadcrumb and page tabs" className="sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b border-slate-200 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex flex-wrap items-center justify-between gap-4">
-          {/* Breadcrumb & Back */}
-          <div className="flex items-center gap-2 text-sm text-[#736b63]">
+          {/* Breadcrumb & Back to Shop */}
+          <div className="flex items-center gap-2 text-sm text-slate-500">
             <button
               onClick={onNavigateShop}
-              className="inline-flex items-center gap-1.5 font-medium hover:text-[#1c1c1e] transition-colors"
+              className="inline-flex items-center gap-1.5 font-medium hover:text-slate-900 transition-colors"
             >
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
               </svg>
               <span>Back to Shop</span>
             </button>
-            <span className="text-[#c7baa8]">/</span>
-            <span className="font-semibold text-[#1c1c1e]">{product.model}</span>
+            <span className="text-slate-300">/</span>
+            <span className="font-semibold text-slate-900">{product.model}</span>
           </div>
 
           {/* Model Switcher Dropdown */}
           <div className="flex items-center gap-2">
-            <span className="text-xs uppercase tracking-wider text-[#8b8071] font-medium hidden sm:inline">
+            <span className="text-xs uppercase tracking-wider text-slate-400 font-medium hidden sm:inline">
               Model:
             </span>
-            <div className="flex items-center bg-[#efe7da] p-0.5 rounded-full border border-[#ddcfbd]">
+            <div className="flex items-center bg-slate-100 p-0.5 rounded-full border border-slate-200">
               {PRODUCTS.map((p) => (
                 <button
                   key={p.id}
                   onClick={() => onSelectProduct(p)}
                   className={`px-3 py-1 text-xs font-semibold rounded-full transition-all ${
                     p.id === product.id
-                      ? 'bg-white text-[#1c1c1e] shadow-sm'
-                      : 'text-[#6e6355] hover:text-[#1c1c1e]'
+                      ? 'bg-white text-slate-900 shadow-sm'
+                      : 'text-slate-600 hover:text-slate-900'
                   }`}
                 >
                   {p.model}
@@ -189,8 +206,8 @@ export function ProductDetailPage({
               onClick={() => scrollToSection('overview-section', 'overview')}
               className={`pb-1 transition-all border-b-2 ${
                 activeTab === 'overview'
-                  ? 'border-[#1c1c1e] text-[#1c1c1e]'
-                  : 'border-transparent text-[#7e7467] hover:text-[#1c1c1e]'
+                  ? 'border-slate-900 text-slate-900'
+                  : 'border-transparent text-slate-500 hover:text-slate-900'
               }`}
             >
               Overview
@@ -199,18 +216,22 @@ export function ProductDetailPage({
               onClick={() => scrollToSection('deep-dive-section', 'deep-dive')}
               className={`pb-1 transition-all border-b-2 ${
                 activeTab === 'deep-dive'
-                  ? 'border-[#1c1c1e] text-[#1c1c1e]'
-                  : 'border-transparent text-[#7e7467] hover:text-[#1c1c1e]'
+                  ? 'border-slate-900 text-slate-900'
+                  : 'border-transparent text-slate-500 hover:text-slate-900'
               }`}
             >
               Deep Dive
             </button>
             <button
-              onClick={() => scrollToSection('deep-dive-section', 'faqs')}
+              onClick={() => {
+                scrollToSection('deep-dive-section', 'faqs');
+                setDeepDiveSubTab('product');
+                setOpenAccordions((prev) => ({ ...prev, about: true, howItWorks: true, whoShouldUse: true }));
+              }}
               className={`pb-1 transition-all border-b-2 ${
                 activeTab === 'faqs'
-                  ? 'border-[#1c1c1e] text-[#1c1c1e]'
-                  : 'border-transparent text-[#7e7467] hover:text-[#1c1c1e]'
+                  ? 'border-slate-900 text-slate-900'
+                  : 'border-transparent text-slate-500 hover:text-slate-900'
               }`}
             >
               FAQs
@@ -219,8 +240,8 @@ export function ProductDetailPage({
               onClick={() => scrollToSection('reviews-section', 'reviews')}
               className={`pb-1 transition-all border-b-2 ${
                 activeTab === 'reviews'
-                  ? 'border-[#1c1c1e] text-[#1c1c1e]'
-                  : 'border-transparent text-[#7e7467] hover:text-[#1c1c1e]'
+                  ? 'border-slate-900 text-slate-900'
+                  : 'border-transparent text-slate-500 hover:text-slate-900'
               }`}
             >
               Reviews ({product.reviewCount})
@@ -229,21 +250,22 @@ export function ProductDetailPage({
         </div>
       </nav>
 
-      {/* 2. MAIN PRODUCT HERO SHOWCASE & BUYING BOX */}
-      <main id="overview-section" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-16">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-start">
-          {/* LEFT COLUMN: MULTI-IMAGE GALLERY (5 Cols) */}
-          <div className="lg:col-span-6 flex flex-col-reverse md:flex-row gap-4 sticky top-20">
+      {/* 2. MAIN TWO-COLUMN CONTAINER: STICKY GALLERY (LEFT) + CONTINUOUS SCROLLING DETAILS (RIGHT) */}
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-16">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-start">
+          
+          {/* LEFT COLUMN: MULTI-IMAGE GALLERY (Sticky alongside all right column content!) */}
+          <div className="lg:col-span-6 lg:sticky lg:top-20 self-start flex flex-col-reverse sm:flex-row gap-4">
             {/* Vertical Thumbnail Strip */}
-            <div className="flex md:flex-col gap-3 overflow-x-auto md:overflow-y-auto max-h-[580px] pb-2 md:pb-0 scrollbar-none">
+            <div className="flex sm:flex-col gap-3 overflow-x-auto sm:overflow-y-auto max-h-[580px] pb-2 sm:pb-0 scrollbar-none">
               {product.galleryThumbnails.map((item, idx) => (
                 <button
                   key={idx}
                   onClick={() => setActiveImageIndex(idx)}
-                  className={`relative flex-shrink-0 w-16 h-16 md:w-20 md:h-20 rounded-2xl overflow-hidden border-2 transition-all p-1.5 bg-white ${
+                  className={`relative flex-shrink-0 w-16 h-16 sm:w-20 sm:h-20 rounded-2xl overflow-hidden border-2 transition-all p-1.5 bg-white ${
                     idx === activeImageIndex
-                      ? 'border-[#1c1c1e] shadow-md scale-105'
-                      : 'border-[#e8dcce] opacity-70 hover:opacity-100 hover:border-[#b4a694]'
+                      ? 'border-slate-900 shadow-md scale-105'
+                      : 'border-slate-200 opacity-70 hover:opacity-100 hover:border-slate-400'
                   }`}
                   aria-label={`View ${item.label}`}
                 >
@@ -257,17 +279,17 @@ export function ProductDetailPage({
             </div>
 
             {/* Large Main Stage Image View */}
-            <div className="relative flex-1 bg-white rounded-3xl border border-[#ebdcca] shadow-sm p-6 sm:p-8 flex items-center justify-center min-h-[460px] md:min-h-[560px] group overflow-hidden">
+            <div className="relative flex-1 bg-white rounded-3xl border border-slate-200 shadow-sm p-6 sm:p-8 flex items-center justify-center min-h-[440px] sm:min-h-[540px] group overflow-hidden">
               {/* 30-Day Money-Back Guarantee Seal at Top Right */}
-              <div className="absolute top-5 right-5 z-10">
-                <div className="w-16 h-16 md:w-20 md:h-20 rounded-full border-2 border-dashed border-[#1c1c1e] flex flex-col items-center justify-center bg-[#faf7f2]/90 backdrop-blur-sm p-1.5 text-center shadow-sm">
-                  <span className="text-[9px] uppercase tracking-wider font-extrabold text-[#7e7467] leading-none">
+              <div className="absolute top-5 right-5 z-10 pointer-events-none">
+                <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full border-2 border-dashed border-slate-900 flex flex-col items-center justify-center bg-white/95 backdrop-blur-sm p-1.5 text-center shadow-sm">
+                  <span className="text-[9px] uppercase tracking-wider font-extrabold text-slate-500 leading-none">
                     MONEY BACK
                   </span>
-                  <span className="text-sm md:text-base font-black text-[#1c1c1e] leading-tight">
+                  <span className="text-sm sm:text-base font-black text-slate-900 leading-tight">
                     30
                   </span>
-                  <span className="text-[9px] uppercase tracking-wider font-extrabold text-[#7e7467] leading-none">
+                  <span className="text-[9px] uppercase tracking-wider font-extrabold text-slate-500 leading-none">
                     DAYS
                   </span>
                 </div>
@@ -276,7 +298,7 @@ export function ProductDetailPage({
               {/* Prev Image Arrow */}
               <button
                 onClick={handlePrevImage}
-                className="absolute left-4 z-10 w-10 h-10 rounded-full bg-white/80 hover:bg-white text-[#1c1c1e] shadow-md flex items-center justify-center border border-[#ebdcca] transition-all opacity-80 group-hover:opacity-100 hover:scale-105"
+                className="absolute left-4 z-10 w-10 h-10 rounded-full bg-white/90 hover:bg-white text-slate-900 shadow-md flex items-center justify-center border border-slate-200 transition-all opacity-80 group-hover:opacity-100 hover:scale-105"
                 aria-label="Previous photo"
               >
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -294,7 +316,7 @@ export function ProductDetailPage({
               {/* Next Image Arrow */}
               <button
                 onClick={handleNextImage}
-                className="absolute right-4 z-10 w-10 h-10 rounded-full bg-white/80 hover:bg-white text-[#1c1c1e] shadow-md flex items-center justify-center border border-[#ebdcca] transition-all opacity-80 group-hover:opacity-100 hover:scale-105"
+                className="absolute right-4 z-10 w-10 h-10 rounded-full bg-white/90 hover:bg-white text-slate-900 shadow-md flex items-center justify-center border border-slate-200 transition-all opacity-80 group-hover:opacity-100 hover:scale-105"
                 aria-label="Next photo"
               >
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -318,8 +340,9 @@ export function ProductDetailPage({
             </div>
           </div>
 
-          {/* RIGHT COLUMN: BUYING & PRODUCT DETAILS PANEL (6 Cols) */}
-          <div className="lg:col-span-6 flex flex-col gap-5">
+          {/* RIGHT COLUMN: SCROLLING DETAILS (BUY BOX, DEEP DIVE, INCLUDED IN BOX, EXPERT RECOMMENDATIONS) */}
+          <div id="overview-section" className="lg:col-span-6 flex flex-col gap-6">
+            
             {/* Category Badge */}
             <div>
               <span className="inline-block px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-[#5cb85c] text-white shadow-sm">
@@ -329,10 +352,10 @@ export function ProductDetailPage({
 
             {/* Product Title & Subtitle */}
             <div>
-              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight text-[#1c1c1e] leading-snug">
+              <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 leading-snug">
                 {product.fullTitle}
               </h1>
-              <p className="mt-2 text-base text-[#6b6256] font-medium leading-relaxed">
+              <p className="mt-2 text-base text-slate-600 font-medium leading-relaxed">
                 {product.subtitle}
               </p>
             </div>
@@ -341,33 +364,32 @@ export function ProductDetailPage({
             <div className="flex items-center gap-2">
               <div className="flex items-center text-amber-500">
                 {[...Array(5)].map((_, i) => (
-                  <svg
-                    key={i}
-                    className="w-4 h-4 fill-current"
-                    viewBox="0 0 20 20"
-                  >
+                  <svg key={i} className="w-4 h-4 fill-current" viewBox="0 0 20 20">
                     <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                   </svg>
                 ))}
               </div>
-              <span className="text-sm font-bold text-[#1c1c1e]">{product.rating}</span>
-              <span className="text-xs text-[#8c8273]">
+              <span className="text-sm font-bold text-slate-900">{product.rating}</span>
+              <button
+                onClick={() => scrollToSection('reviews-section', 'reviews')}
+                className="text-xs text-slate-500 hover:text-slate-900 underline ml-1"
+              >
                 ({product.reviewCount} verified reviews)
-              </span>
+              </button>
             </div>
 
             {/* Pricing Section */}
-            <div className="flex flex-wrap items-baseline gap-3 pt-2">
-              <span className="text-3xl sm:text-4xl font-extrabold text-[#1c1c1e] tracking-tight">
+            <div className="flex flex-wrap items-baseline gap-3 pt-1">
+              <span className="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">
                 {formatINR(product.price)}
               </span>
-              <span className="text-lg text-[#9c9182] line-through">
+              <span className="text-lg text-slate-400 line-through">
                 {formatINR(product.originalPrice)}
               </span>
               <span className="px-2.5 py-0.5 rounded-full text-xs font-black bg-[#e53935] text-white">
                 {product.discount}
               </span>
-              <span className="text-xs text-[#7e7467] font-medium ml-1">
+              <span className="text-xs text-slate-500 font-medium ml-1">
                 (Incl. of all taxes)
               </span>
             </div>
@@ -384,8 +406,13 @@ export function ProductDetailPage({
                   <p className="text-sm sm:text-base font-semibold leading-snug">
                     <span className="text-[#f59e0b] font-bold">90% Reduction</span> of airborne pollutants in your Breathing Space
                   </p>
-                  <p className="text-xs text-slate-400 mt-0.5 flex items-center gap-1 hover:text-white cursor-pointer transition-colors"
-                     onClick={() => scrollToSection('test-report-box', 'deep-dive')}>
+                  <p
+                    className="text-xs text-slate-400 mt-0.5 flex items-center gap-1 hover:text-white cursor-pointer transition-colors"
+                    onClick={() => {
+                      scrollToSection('deep-dive-section', 'deep-dive');
+                      setDeepDiveSubTab('reports');
+                    }}
+                  >
                     <span>Tested At National Testing Facility (IIT Kanpur)</span>
                     <span>&rarr;</span>
                   </p>
@@ -394,7 +421,7 @@ export function ProductDetailPage({
             </div>
 
             {/* 4 Feature Icon Capsules in a soft card */}
-            <div className="bg-white rounded-2xl p-4 sm:p-5 border border-[#ebdcca] shadow-sm">
+            <div className="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200 shadow-sm">
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-center">
                 {/* 1. PM2.5 / PM10 */}
                 <div className="flex flex-col items-center">
@@ -403,7 +430,7 @@ export function ProductDetailPage({
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
                     </svg>
                   </div>
-                  <span className="text-xs font-bold text-[#1c1c1e] leading-tight">
+                  <span className="text-xs font-bold text-slate-900 leading-tight">
                     Fights Against<br />PM2.5, PM10
                   </span>
                 </div>
@@ -415,7 +442,7 @@ export function ProductDetailPage({
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                     </svg>
                   </div>
-                  <span className="text-xs font-bold text-[#1c1c1e] leading-tight">
+                  <span className="text-xs font-bold text-slate-900 leading-tight">
                     Allergy and<br />Asthma Relief
                   </span>
                 </div>
@@ -427,7 +454,7 @@ export function ProductDetailPage({
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                     </svg>
                   </div>
-                  <span className="text-xs font-bold text-[#1c1c1e] leading-tight">
+                  <span className="text-xs font-bold text-slate-900 leading-tight">
                     Shields Virus<br />and Bacteria
                   </span>
                 </div>
@@ -439,7 +466,7 @@ export function ProductDetailPage({
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                   </div>
-                  <span className="text-xs font-bold text-[#1c1c1e] leading-tight">
+                  <span className="text-xs font-bold text-slate-900 leading-tight">
                     Odour<br />Neutralization
                   </span>
                 </div>
@@ -459,10 +486,10 @@ export function ProductDetailPage({
             {/* Color Swatch Selector */}
             <div className="pt-1">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-sm font-bold text-[#1c1c1e]">
-                  Color: <span className="font-normal text-[#5c5448]">{selectedColor}</span>
+                <span className="text-sm font-bold text-slate-900">
+                  Color: <span className="font-normal text-slate-600">{selectedColor}</span>
                 </span>
-                <span className="text-xs text-[#8c8273]">In Stock &bull; Ships in 24h</span>
+                <span className="text-xs text-slate-500 font-medium">In Stock &bull; Ships in 24h</span>
               </div>
               <div className="flex items-center gap-3">
                 {product.colors.map((c) => (
@@ -472,8 +499,8 @@ export function ProductDetailPage({
                     style={{ backgroundColor: c.hex }}
                     className={`w-9 h-9 rounded-full border-2 transition-all shadow-sm ${
                       selectedColor === c.name
-                        ? 'border-[#1c1c1e] ring-2 ring-offset-2 ring-[#1c1c1e] scale-110'
-                        : 'border-[#ebdcca] hover:scale-105'
+                        ? 'border-slate-900 ring-2 ring-offset-2 ring-slate-900 scale-110'
+                        : 'border-slate-200 hover:scale-105'
                     }`}
                     aria-label={`Select ${c.name}`}
                     title={c.name}
@@ -483,22 +510,22 @@ export function ProductDetailPage({
             </div>
 
             {/* Quantity Stepper & Main Add-To-Cart CTA */}
-            <div className="flex flex-col sm:flex-row items-stretch gap-3 pt-2">
+            <div className="flex flex-col sm:flex-row items-stretch gap-3 pt-1">
               {/* Stepper */}
-              <div className="inline-flex items-center justify-between border-2 border-[#1c1c1e] rounded-full px-4 py-2 bg-white w-full sm:w-36">
+              <div className="inline-flex items-center justify-between border-2 border-slate-900 rounded-full px-4 py-2 bg-white w-full sm:w-36">
                 <button
                   type="button"
                   onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-                  className="text-lg font-bold text-[#1c1c1e] hover:text-[#5c5448] px-2"
+                  className="text-lg font-bold text-slate-900 hover:text-slate-600 px-2"
                   aria-label="Decrease quantity"
                 >
                   &minus;
                 </button>
-                <span className="font-bold text-base text-[#1c1c1e]">{quantity}</span>
+                <span className="font-bold text-base text-slate-900">{quantity}</span>
                 <button
                   type="button"
                   onClick={() => setQuantity((q) => q + 1)}
-                  className="text-lg font-bold text-[#1c1c1e] hover:text-[#5c5448] px-2"
+                  className="text-lg font-bold text-slate-900 hover:text-slate-600 px-2"
                   aria-label="Increase quantity"
                 >
                   &#43;
@@ -509,7 +536,7 @@ export function ProductDetailPage({
               <button
                 type="button"
                 onClick={handleAddToCart}
-                className="flex-1 bg-[#1c1c1e] hover:bg-black text-white font-bold py-3.5 px-8 rounded-full shadow-md hover:shadow-lg transition-all transform hover:-translate-y-0.5 active:translate-y-0 flex items-center justify-center gap-2"
+                className="flex-1 bg-slate-900 hover:bg-black text-white font-bold py-3.5 px-8 rounded-full shadow-md hover:shadow-lg transition-all transform hover:-translate-y-0.5 active:translate-y-0 flex items-center justify-center gap-2"
               >
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
@@ -519,8 +546,8 @@ export function ProductDetailPage({
             </div>
 
             {/* Guarantee Tag Under Add to Cart */}
-            <div className="flex items-center justify-center gap-2 text-xs font-semibold text-[#6b6256] pt-0.5">
-              <span className="inline-block border border-[#7e7467] rounded px-1.5 py-0.5 text-[10px] font-black uppercase">
+            <div className="flex items-center justify-center gap-2 text-xs font-semibold text-slate-600 pt-0.5">
+              <span className="inline-block border border-slate-400 rounded px-1.5 py-0.5 text-[10px] font-black uppercase">
                 30 DAYS
               </span>
               <span>Get Easy 30 Days Money-Back Guarantee</span>
@@ -538,7 +565,7 @@ export function ProductDetailPage({
               <span>Need help? Request a Callback</span>
             </button>
 
-            {/* EMI Options Box (Warm Cream / Gold Tint) */}
+            {/* EMI Options Box (Warm Gold Tint) */}
             <div className="bg-[#fef3c7] border border-[#fde68a] rounded-2xl p-4 flex items-center justify-between gap-3 text-[#92400e]">
               <div>
                 <p className="text-sm font-bold">
@@ -549,45 +576,45 @@ export function ProductDetailPage({
               <button
                 type="button"
                 onClick={handleAddToCart}
-                className="bg-[#1c1c1e] text-white hover:bg-black text-xs font-bold px-4 py-2 rounded-full transition-colors"
+                className="bg-slate-900 text-white hover:bg-black text-xs font-bold px-4 py-2 rounded-full transition-colors"
               >
                 Buy on EMI
               </button>
             </div>
 
             {/* 4 Trust Badges Row */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2 text-center">
-              <div className="flex flex-col items-center p-2 rounded-xl bg-white border border-[#ebdcca]">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-1 text-center">
+              <div className="flex flex-col items-center p-2 rounded-xl bg-slate-50 border border-slate-200">
                 <svg className="w-5 h-5 text-[#2e7d32] mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                 </svg>
-                <span className="text-[11px] font-bold text-[#1c1c1e] leading-tight">7-Days Free Exchange</span>
+                <span className="text-[11px] font-bold text-slate-800 leading-tight">7-Days Free Exchange</span>
               </div>
 
-              <div className="flex flex-col items-center p-2 rounded-xl bg-white border border-[#ebdcca]">
+              <div className="flex flex-col items-center p-2 rounded-xl bg-slate-50 border border-slate-200">
                 <svg className="w-5 h-5 text-[#2e7d32] mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
                 </svg>
-                <span className="text-[11px] font-bold text-[#1c1c1e] leading-tight">Free Doorstep Delivery</span>
+                <span className="text-[11px] font-bold text-slate-800 leading-tight">Free Doorstep Delivery</span>
               </div>
 
-              <div className="flex flex-col items-center p-2 rounded-xl bg-white border border-[#ebdcca]">
+              <div className="flex flex-col items-center p-2 rounded-xl bg-slate-50 border border-slate-200">
                 <svg className="w-5 h-5 text-[#2e7d32] mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z" />
                 </svg>
-                <span className="text-[11px] font-bold text-[#1c1c1e] leading-tight">24/7 Support</span>
+                <span className="text-[11px] font-bold text-slate-800 leading-tight">24/7 Support</span>
               </div>
 
-              <div className="flex flex-col items-center p-2 rounded-xl bg-white border border-[#ebdcca]">
+              <div className="flex flex-col items-center p-2 rounded-xl bg-slate-50 border border-slate-200">
                 <svg className="w-5 h-5 text-[#2e7d32] mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
                 </svg>
-                <span className="text-[11px] font-bold text-[#1c1c1e] leading-tight">Cash on Delivery</span>
+                <span className="text-[11px] font-bold text-slate-800 leading-tight">Cash on Delivery</span>
               </div>
             </div>
 
             {/* Laboratory Test Verification Card */}
-            <div id="test-report-box" className="bg-[#f0f9ff] border border-[#bae6fd] rounded-2xl p-5 text-[#0369a1]">
+            <div className="bg-[#f0f9ff] border border-[#bae6fd] rounded-2xl p-5 text-[#0369a1]">
               <div className="flex items-start gap-3">
                 <div className="w-10 h-10 rounded-full bg-[#0284c7] text-white flex items-center justify-center flex-shrink-0 font-black text-sm">
                   ✓
@@ -604,419 +631,471 @@ export function ProductDetailPage({
                 </div>
               </div>
             </div>
-          </div>
-        </div>
-      </main>
 
-      {/* 3. DEEP DIVE SECTION (TABS & EXPANDABLE ACCORDIONS) */}
-      <section id="deep-dive-section" className="bg-white border-y border-[#ebdcca] py-16">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-          {/* Sub Tabs: Product | Technical Specs | Test Reports */}
-          <div className="flex items-center justify-center border-b border-[#ebdcca] mb-10">
-            <button
-              onClick={() => setDeepDiveSubTab('product')}
-              className={`px-6 py-3 font-bold text-sm sm:text-base border-b-2 transition-all ${
-                deepDiveSubTab === 'product'
-                  ? 'border-[#1c1c1e] text-[#1c1c1e]'
-                  : 'border-transparent text-[#8b8071] hover:text-[#1c1c1e]'
-              }`}
-            >
-              Product Overview
-            </button>
-            <button
-              onClick={() => setDeepDiveSubTab('specs')}
-              className={`px-6 py-3 font-bold text-sm sm:text-base border-b-2 transition-all ${
-                deepDiveSubTab === 'specs'
-                  ? 'border-[#1c1c1e] text-[#1c1c1e]'
-                  : 'border-transparent text-[#8b8071] hover:text-[#1c1c1e]'
-              }`}
-            >
-              Technical Specs
-            </button>
-            <button
-              onClick={() => setDeepDiveSubTab('reports')}
-              className={`px-6 py-3 font-bold text-sm sm:text-base border-b-2 transition-all ${
-                deepDiveSubTab === 'reports'
-                  ? 'border-[#1c1c1e] text-[#1c1c1e]'
-                  : 'border-transparent text-[#8b8071] hover:text-[#1c1c1e]'
-              }`}
-            >
-              Test Reports
-            </button>
-          </div>
-
-          {/* TAB 1: PRODUCT ACCORDIONS */}
-          {deepDiveSubTab === 'product' && (
-            <div className="space-y-4">
-              {/* Accordion 1: About the Product */}
-              <div className="border border-[#ebdcca] rounded-2xl overflow-hidden bg-[#faf7f2]/50">
+            {/* 3. DEEP DIVE SECTION (POSITIONED RIGHT HERE ALONGSIDE THE PRODUCT IMAGE AS IN REFERENCE!) */}
+            <div id="deep-dive-section" className="pt-8 border-t border-slate-200">
+              {/* Sub-Tabs: Product | Technical Specs | Test Reports */}
+              <div className="flex items-center border-b border-slate-200 mb-6">
                 <button
-                  type="button"
-                  onClick={() => toggleAccordion('about')}
-                  className="w-full px-6 py-4 flex items-center justify-between text-left font-bold text-lg text-[#1c1c1e] hover:bg-[#faf7f2] transition-colors"
+                  onClick={() => setDeepDiveSubTab('product')}
+                  className={`pb-3 px-4 font-bold text-sm sm:text-base border-b-2 transition-all ${
+                    deepDiveSubTab === 'product'
+                      ? 'border-slate-900 text-slate-900'
+                      : 'border-transparent text-slate-400 hover:text-slate-800'
+                  }`}
                 >
-                  <span>About the Product</span>
-                  <span className="text-xl font-bold text-[#7e7467]">
-                    {openAccordions['about'] ? '−' : '+'}
-                  </span>
+                  Product
                 </button>
-                {openAccordions['about'] && (
-                  <div className="px-6 pb-6 pt-2 text-[#4a4237] text-sm leading-relaxed border-t border-[#ebdcca] space-y-4">
-                    <p className="font-medium text-base text-[#1c1c1e]">
-                      {product.deepDive.about.intro}
-                    </p>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
-                      {product.deepDive.about.points.map((pt, i) => (
-                        <div key={i} className="bg-white p-4 rounded-xl border border-[#ebdcca]">
-                          <h5 className="font-bold text-[#1c1c1e] mb-1">{pt.title}</h5>
-                          <p className="text-xs text-[#6e6355] leading-relaxed">{pt.description}</p>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* Accordion 2: How does it work? */}
-              <div className="border border-[#ebdcca] rounded-2xl overflow-hidden bg-[#faf7f2]/50">
                 <button
-                  type="button"
-                  onClick={() => toggleAccordion('howItWorks')}
-                  className="w-full px-6 py-4 flex items-center justify-between text-left font-bold text-lg text-[#1c1c1e] hover:bg-[#faf7f2] transition-colors"
+                  onClick={() => setDeepDiveSubTab('specs')}
+                  className={`pb-3 px-4 font-bold text-sm sm:text-base border-b-2 transition-all ${
+                    deepDiveSubTab === 'specs'
+                      ? 'border-slate-900 text-slate-900'
+                      : 'border-transparent text-slate-400 hover:text-slate-800'
+                  }`}
                 >
-                  <span>How does it work?</span>
-                  <span className="text-xl font-bold text-[#7e7467]">
-                    {openAccordions['howItWorks'] ? '−' : '+'}
-                  </span>
+                  Technical Specs
                 </button>
-                {openAccordions['howItWorks'] && (
-                  <div className="px-6 pb-6 pt-2 text-[#4a4237] text-sm leading-relaxed border-t border-[#ebdcca] space-y-4">
-                    <p className="font-medium text-base text-[#1c1c1e]">
-                      {product.deepDive.howItWorks.title}
-                    </p>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
-                      {product.deepDive.howItWorks.steps.map((st) => (
-                        <div key={st.step} className="bg-white p-4 rounded-xl border border-[#ebdcca] relative">
-                          <span className="text-2xl font-black text-[#d6c7b3] absolute top-3 right-3">
-                            {st.step}
-                          </span>
-                          <h5 className="font-bold text-[#1c1c1e] mb-1 pr-6">{st.title}</h5>
-                          <p className="text-xs text-[#6e6355] leading-relaxed">{st.description}</p>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* Accordion 3: How to use? */}
-              <div className="border border-[#ebdcca] rounded-2xl overflow-hidden bg-[#faf7f2]/50">
                 <button
-                  type="button"
-                  onClick={() => toggleAccordion('howToUse')}
-                  className="w-full px-6 py-4 flex items-center justify-between text-left font-bold text-lg text-[#1c1c1e] hover:bg-[#faf7f2] transition-colors"
+                  onClick={() => setDeepDiveSubTab('reports')}
+                  className={`pb-3 px-4 font-bold text-sm sm:text-base border-b-2 transition-all ${
+                    deepDiveSubTab === 'reports'
+                      ? 'border-slate-900 text-slate-900'
+                      : 'border-transparent text-slate-400 hover:text-slate-800'
+                  }`}
                 >
-                  <span>How to use?</span>
-                  <span className="text-xl font-bold text-[#7e7467]">
-                    {openAccordions['howToUse'] ? '−' : '+'}
-                  </span>
+                  Test Reports
                 </button>
-                {openAccordions['howToUse'] && (
-                  <div className="px-6 pb-6 pt-2 text-[#4a4237] text-sm leading-relaxed border-t border-[#ebdcca] space-y-4">
-                    <p className="font-medium text-base text-[#1c1c1e]">
-                      {product.deepDive.howToUse.title}
-                    </p>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
-                      {product.deepDive.howToUse.steps.map((st) => (
-                        <div key={st.step} className="bg-white p-4 rounded-xl border border-[#ebdcca] relative">
-                          <span className="text-2xl font-black text-[#d6c7b3] absolute top-3 right-3">
-                            {st.step}
-                          </span>
-                          <h5 className="font-bold text-[#1c1c1e] mb-1 pr-6">{st.title}</h5>
-                          <p className="text-xs text-[#6e6355] leading-relaxed">{st.description}</p>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
-
-          {/* TAB 2: TECHNICAL SPECS TABLE */}
-          {deepDiveSubTab === 'specs' && (
-            <div className="bg-[#faf7f2] rounded-2xl border border-[#ebdcca] overflow-hidden p-6">
-              <h3 className="text-lg font-bold text-[#1c1c1e] mb-4">
-                Detailed Technical Specifications: {product.model}
-              </h3>
-              <div className="divide-y divide-[#ebdcca]">
-                {product.specs.map((sp, idx) => (
-                  <div key={idx} className="py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-1">
-                    <span className="text-sm font-semibold text-[#6e6355]">{sp.label}</span>
-                    <span className="text-sm font-bold text-[#1c1c1e] sm:text-right">{sp.value}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* TAB 3: TEST REPORTS */}
-          {deepDiveSubTab === 'reports' && (
-            <div className="bg-[#faf7f2] rounded-2xl border border-[#ebdcca] p-6 space-y-6">
-              <div>
-                <span className="text-xs font-bold uppercase tracking-wider text-[#2e7d32] bg-[#e8f5e9] px-3 py-1 rounded-full">
-                  NABL Certified Chamber Test
-                </span>
-                <h3 className="text-xl font-bold text-[#1c1c1e] mt-2">
-                  {product.testReport.title}
-                </h3>
-                <p className="text-sm text-[#6e6355] mt-1">{product.testReport.lab}</p>
               </div>
 
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                {product.testReport.metrics.map((m, idx) => (
-                  <div key={idx} className="bg-white p-4 rounded-xl border border-[#ebdcca] text-center">
-                    <p className="text-2xl font-black text-[#1c1c1e]">{m.value}</p>
-                    <p className="text-xs text-[#7e7467] font-semibold mt-1">{m.label}</p>
-                  </div>
-                ))}
-              </div>
-
-              <div className="bg-white p-5 rounded-xl border border-[#ebdcca] text-sm text-[#4a4237] leading-relaxed space-y-2">
-                <p className="font-semibold text-[#1c1c1e]">Testing Protocol & Summary:</p>
-                <p>{product.testReport.description}</p>
-                <p className="italic text-xs text-[#7e7467]">{product.testReport.methodology}</p>
-              </div>
-            </div>
-          )}
-        </div>
-      </section>
-
-      {/* 4. INCLUDED IN THE BOX SHOWCASE */}
-      <section className="py-16 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="bg-white rounded-3xl border border-[#ebdcca] p-8 shadow-sm">
-          <h2 className="text-2xl sm:text-3xl font-extrabold text-center text-[#1c1c1e] mb-8 tracking-tight">
-            Included in the Box
-          </h2>
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
-            {product.boxItems.map((item, idx) => (
-              <div
-                key={idx}
-                className="bg-[#faf7f2] border border-[#ebdcca] rounded-2xl p-4 flex flex-col items-center text-center hover:shadow-md transition-shadow"
-              >
-                <div className="w-14 h-14 rounded-2xl bg-white border border-[#ebdcca] flex items-center justify-center text-[#1c1c1e] mb-3 shadow-sm">
-                  {item.icon === 'purifier' && (
-                    <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <rect x="6" y="3" width="12" height="18" rx="2" strokeWidth={1.8} />
-                      <circle cx="12" cy="8" r="2" strokeWidth={1.8} />
-                      <path strokeLinecap="round" strokeWidth={1.8} d="M9 14h6m-6 3h6" />
-                    </svg>
-                  )}
-                  {item.icon === 'filter' && (
-                    <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M12 3v18m-7-9h14M8 6h8m-8 12h8" />
-                    </svg>
-                  )}
-                  {item.icon === 'remote' && (
-                    <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <rect x="7" y="2" width="10" height="20" rx="3" strokeWidth={1.8} />
-                      <circle cx="12" cy="7" r="1.5" strokeWidth={1.8} />
-                      <circle cx="12" cy="12" r="1.5" strokeWidth={1.8} />
-                      <circle cx="12" cy="17" r="1.5" strokeWidth={1.8} />
-                    </svg>
-                  )}
-                  {item.icon === 'cable' && (
-                    <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                    </svg>
-                  )}
-                  {item.icon === 'manual' && (
-                    <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                    </svg>
-                  )}
-                </div>
-                <h4 className="text-xs font-bold text-[#1c1c1e] leading-snug">{item.title}</h4>
-                <p className="text-[10px] text-[#7e7467] mt-1 leading-tight">{item.subtitle}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* 5. EXPERT & DOCTOR RECOMMENDATIONS */}
-      <section className="py-16 bg-[#efe7da]/60 border-t border-[#ebdcca]">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center max-w-2xl mx-auto mb-12">
-            <span className="text-xs uppercase font-extrabold tracking-wider text-[#7e7467]">
-              CLINICAL & LIFESTYLE ENDORSEMENTS
-            </span>
-            <h2 className="text-3xl font-extrabold text-[#1c1c1e] mt-1 tracking-tight">
-              Expert Recommended
-            </h2>
-            <p className="text-sm text-[#6e6355] mt-2">
-              Recognized by leading pulmonologists, clinicians, and holistic lifestyle physicians.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {EXPERT_RECOMMENDATIONS.map((expert) => (
-              <div
-                key={expert.id}
-                className="bg-white rounded-3xl border border-[#ebdcca] overflow-hidden shadow-sm flex flex-col justify-between"
-              >
-                <div className="h-48 overflow-hidden bg-slate-100">
-                  <img
-                    src={expert.image}
-                    alt={expert.name}
-                    className="w-full h-full object-cover object-center transform hover:scale-105 transition-transform duration-500"
-                  />
-                </div>
-                <div className="p-6 flex-1 flex flex-col justify-between">
-                  <div>
-                    <h3 className="font-extrabold text-base text-[#1c1c1e]">{expert.name}</h3>
-                    <p className="text-xs font-semibold text-[#8b8071] mt-0.5">{expert.role}</p>
-                    <p className="text-[11px] text-[#a89d8e]">{expert.organization}</p>
-                    <p className="text-xs text-[#52493d] mt-4 leading-relaxed italic">
-                      &ldquo;{expert.quote}&rdquo;
-                    </p>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* 6. CUSTOMER REVIEWS SECTION */}
-      <section id="reviews-section" className="py-20 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 mb-12">
-          <div>
-            <h2 className="text-2xl sm:text-3xl font-extrabold text-[#1c1c1e] tracking-tight">
-              Customer Reviews
-            </h2>
-            <p className="text-sm text-[#7e7467] mt-1">
-              Read real verified stories from homeowners and families.
-            </p>
-          </div>
-          <button
-            onClick={() => setIsReviewModalOpen(true)}
-            className="border-2 border-[#1c1c1e] bg-white hover:bg-[#1c1c1e] hover:text-white text-[#1c1c1e] font-bold text-sm px-6 py-2.5 rounded-full transition-all shadow-sm"
-          >
-            Write a review
-          </button>
-        </div>
-
-        {/* Aggregate Ratings Overview */}
-        <div className="bg-white rounded-3xl border border-[#ebdcca] p-6 sm:p-8 mb-10 shadow-sm grid grid-cols-1 md:grid-cols-12 gap-8 items-center">
-          {/* Big Score (4 cols) */}
-          <div className="md:col-span-4 flex flex-col items-center md:items-start md:border-r border-[#ebdcca] md:pr-8">
-            <span className="text-5xl font-black text-[#1c1c1e] tracking-tight">{product.rating}</span>
-            <div className="flex items-center text-amber-500 my-2">
-              {[...Array(5)].map((_, i) => (
-                <svg key={i} className="w-5 h-5 fill-current" viewBox="0 0 20 20">
-                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                </svg>
-              ))}
-            </div>
-            <span className="text-xs text-[#7e7467] font-semibold">{product.reviewCount} verified ratings</span>
-          </div>
-
-          {/* Histogram distribution (8 cols) */}
-          <div className="md:col-span-8 space-y-2">
-            {[
-              { star: 5, pct: '88%', count: 125 },
-              { star: 4, pct: '9%', count: 13 },
-              { star: 3, pct: '2%', count: 3 },
-              { star: 2, pct: '0%', count: 0 },
-              { star: 1, pct: '1%', count: 1 },
-            ].map((row) => (
-              <div key={row.star} className="flex items-center gap-3 text-xs font-semibold text-[#6e6355]">
-                <span className="w-12">{row.star} Star</span>
-                <div className="flex-1 h-2 bg-[#efe7da] rounded-full overflow-hidden">
-                  <div
-                    className="h-full bg-amber-500 rounded-full"
-                    style={{ width: row.pct }}
-                  />
-                </div>
-                <span className="w-8 text-right text-[#8b8071]">{row.count}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Customer Review Cards Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {reviewsList.map((rev) => (
-            <div
-              key={rev.id}
-              className="bg-white rounded-2xl border border-[#ebdcca] p-5 shadow-sm flex flex-col justify-between"
-            >
-              <div>
-                {/* Author row */}
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="w-10 h-10 rounded-full bg-[#efe7da] text-[#1c1c1e] font-extrabold text-sm flex items-center justify-center">
-                    {rev.initials}
-                  </div>
-                  <div>
-                    <div className="flex items-center gap-1.5">
-                      <span className="font-bold text-sm text-[#1c1c1e]">{rev.author}</span>
-                      <span className="text-[10px] font-bold text-slate-500">🇮🇳 IN</span>
-                    </div>
-                    {rev.verified && (
-                      <span className="text-[10px] text-[#2e7d32] font-semibold flex items-center gap-0.5">
-                        <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
-                        </svg>
-                        Verified purchase
+              {/* TAB 1: PRODUCT ACCORDIONS (MATCHING USER REFERENCE SCREENSHOT) */}
+              {deepDiveSubTab === 'product' && (
+                <div className="divide-y divide-slate-200 border-t border-slate-200">
+                  {/* Accordion 1: About the Product */}
+                  <div className="py-4">
+                    <button
+                      type="button"
+                      onClick={() => toggleAccordion('about')}
+                      className="w-full flex items-center justify-between text-left font-bold text-base text-slate-900 hover:text-slate-700 transition-colors"
+                    >
+                      <span>About the Product</span>
+                      <span className="text-xl font-bold text-slate-400">
+                        {openAccordions['about'] ? '−' : '+'}
                       </span>
+                    </button>
+                    {openAccordions['about'] && (
+                      <div className="pt-3 text-slate-600 text-sm leading-relaxed space-y-3">
+                        <p className="font-medium text-slate-900">
+                          {product.deepDive.about.intro}
+                        </p>
+                        <div className="space-y-2 pt-1">
+                          {product.deepDive.about.points.map((pt, i) => (
+                            <div key={i} className="bg-slate-50 p-3 rounded-xl border border-slate-100">
+                              <h5 className="font-bold text-slate-900 text-xs mb-1">{pt.title}</h5>
+                              <p className="text-xs text-slate-600 leading-relaxed">{pt.description}</p>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Accordion 2: How does it work? */}
+                  <div className="py-4">
+                    <button
+                      type="button"
+                      onClick={() => toggleAccordion('howItWorks')}
+                      className="w-full flex items-center justify-between text-left font-bold text-base text-slate-900 hover:text-slate-700 transition-colors"
+                    >
+                      <span>How does it work?</span>
+                      <span className="text-xl font-bold text-slate-400">
+                        {openAccordions['howItWorks'] ? '−' : '+'}
+                      </span>
+                    </button>
+                    {openAccordions['howItWorks'] && (
+                      <div className="pt-3 text-slate-600 text-sm leading-relaxed space-y-3">
+                        <p className="font-medium text-slate-900">
+                          {product.deepDive.howItWorks.title}
+                        </p>
+                        <div className="space-y-2 pt-1">
+                          {product.deepDive.howItWorks.steps.map((st) => (
+                            <div key={st.step} className="bg-slate-50 p-3 rounded-xl border border-slate-100 flex gap-3 items-start">
+                              <span className="text-sm font-black text-slate-400 bg-white px-2 py-0.5 rounded border border-slate-200">
+                                {st.step}
+                              </span>
+                              <div>
+                                <h5 className="font-bold text-slate-900 text-xs mb-0.5">{st.title}</h5>
+                                <p className="text-xs text-slate-600 leading-relaxed">{st.description}</p>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Accordion 3: Who should not use / How to use? */}
+                  <div className="py-4">
+                    <button
+                      type="button"
+                      onClick={() => toggleAccordion('whoShouldUse')}
+                      className="w-full flex items-center justify-between text-left font-bold text-base text-slate-900 hover:text-slate-700 transition-colors"
+                    >
+                      <span>How to use & Safety Guidelines</span>
+                      <span className="text-xl font-bold text-slate-400">
+                        {openAccordions['whoShouldUse'] ? '−' : '+'}
+                      </span>
+                    </button>
+                    {openAccordions['whoShouldUse'] && (
+                      <div className="pt-3 text-slate-600 text-sm leading-relaxed space-y-3">
+                        <p className="font-medium text-slate-900">
+                          {product.deepDive.howToUse.title}
+                        </p>
+                        <div className="space-y-2 pt-1">
+                          {product.deepDive.howToUse.steps.map((st) => (
+                            <div key={st.step} className="bg-slate-50 p-3 rounded-xl border border-slate-100 flex gap-3 items-start">
+                              <span className="text-sm font-black text-slate-400 bg-white px-2 py-0.5 rounded border border-slate-200">
+                                {st.step}
+                              </span>
+                              <div>
+                                <h5 className="font-bold text-slate-900 text-xs mb-0.5">{st.title}</h5>
+                                <p className="text-xs text-slate-600 leading-relaxed">{st.description}</p>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Accordion 4: Additional Details */}
+                  <div className="py-4">
+                    <button
+                      type="button"
+                      onClick={() => toggleAccordion('additionalDetails')}
+                      className="w-full flex items-center justify-between text-left font-bold text-base text-slate-900 hover:text-slate-700 transition-colors"
+                    >
+                      <span>Additional Details</span>
+                      <span className="text-xl font-bold text-slate-400">
+                        {openAccordions['additionalDetails'] ? '−' : '+'}
+                      </span>
+                    </button>
+                    {openAccordions['additionalDetails'] && (
+                      <div className="pt-3 text-slate-600 text-xs leading-relaxed space-y-2">
+                        <p>&bull; <strong>Maintenance:</strong> Clean pre-filter every 30 days. Replace True HEPA H13 cartridge annually.</p>
+                        <p>&bull; <strong>Certification:</strong> Tested in compliance with ISO 29463 and NABL certified environmental chambers.</p>
+                        <p>&bull; <strong>Warranty:</strong> 2-year on-site replacement warranty covers motor, fan turbine, and sensor array.</p>
+                      </div>
                     )}
                   </div>
                 </div>
+              )}
 
-                {/* Stars */}
-                <div className="flex items-center text-amber-500 mb-2">
-                  {[...Array(5)].map((_, i) => (
-                    <svg
-                      key={i}
-                      className={`w-3.5 h-3.5 ${i < rev.rating ? 'fill-current' : 'text-slate-200 fill-current'}`}
-                      viewBox="0 0 20 20"
-                    >
-                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                    </svg>
-                  ))}
-                  <span className="text-[10px] text-[#8b8071] ml-2">{rev.date}</span>
+              {/* TAB 2: TECHNICAL SPECS TABLE */}
+              {deepDiveSubTab === 'specs' && (
+                <div className="bg-slate-50 rounded-2xl border border-slate-200 overflow-hidden p-5">
+                  <h4 className="text-base font-bold text-slate-900 mb-3">
+                    Technical Specifications: {product.model}
+                  </h4>
+                  <div className="divide-y divide-slate-200">
+                    {product.specs.map((sp, idx) => (
+                      <div key={idx} className="py-2.5 flex flex-col sm:flex-row sm:items-center justify-between gap-1 text-xs">
+                        <span className="font-semibold text-slate-600">{sp.label}</span>
+                        <span className="font-bold text-slate-900 sm:text-right">{sp.value}</span>
+                      </div>
+                    ))}
+                  </div>
                 </div>
+              )}
 
-                {/* Review Text */}
-                <p className="text-xs text-[#4a4237] leading-relaxed">
-                  &ldquo;{rev.comment}&rdquo;
-                </p>
-              </div>
+              {/* TAB 3: TEST REPORTS */}
+              {deepDiveSubTab === 'reports' && (
+                <div className="bg-slate-50 rounded-2xl border border-slate-200 p-5 space-y-4">
+                  <div>
+                    <span className="text-xs font-bold uppercase tracking-wider text-[#2e7d32] bg-[#e8f5e9] px-2.5 py-0.5 rounded-full">
+                      NABL Certified
+                    </span>
+                    <h4 className="text-base font-bold text-slate-900 mt-2">
+                      {product.testReport.title}
+                    </h4>
+                    <p className="text-xs text-slate-500 mt-0.5">{product.testReport.lab}</p>
+                  </div>
 
-              {/* Helpful footer */}
-              <div className="pt-4 mt-4 border-t border-[#ebdcca] flex items-center justify-between text-xs text-[#7e7467]">
-                <span>Helpful?</span>
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={() => handleVoteHelpful(rev.id)}
-                    className="inline-flex items-center gap-1 hover:text-[#1c1c1e] transition-colors"
+                  <div className="grid grid-cols-2 gap-3">
+                    {product.testReport.metrics.map((m, idx) => (
+                      <div key={idx} className="bg-white p-3 rounded-xl border border-slate-200 text-center">
+                        <p className="text-xl font-black text-slate-900">{m.value}</p>
+                        <p className="text-[11px] text-slate-500 font-medium mt-0.5">{m.label}</p>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="bg-white p-4 rounded-xl border border-slate-200 text-xs text-slate-600 leading-relaxed space-y-1.5">
+                    <p className="font-bold text-slate-900">Laboratory Methodology:</p>
+                    <p>{product.testReport.description}</p>
+                    <p className="italic text-slate-500">{product.testReport.methodology}</p>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* 4. INCLUDED IN THE BOX (POSITIONED RIGHT HERE ALONGSIDE THE PRODUCT IMAGE AS IN REFERENCE!) */}
+            <div id="included-in-box-section" className="bg-[#e4eff8] rounded-3xl p-6 sm:p-7 border border-[#cbe0f2]">
+              <h3 className="text-xl font-bold text-center text-slate-900 mb-6 tracking-tight">
+                Included in the Box
+              </h3>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                {product.boxItems.map((item, idx) => (
+                  <div
+                    key={idx}
+                    className="bg-white rounded-2xl border border-slate-200/80 overflow-hidden shadow-sm flex flex-col justify-between"
                   >
-                    <span>👍</span>
-                    <span className="font-bold">{rev.helpfulCount}</span>
-                  </button>
-                  <button className="inline-flex items-center gap-1 hover:text-[#1c1c1e] transition-colors">
-                    <span>👎 0</span>
-                  </button>
-                </div>
+                    <div className="p-4 flex items-center justify-center min-h-[110px]">
+                      {item.icon === 'purifier' && (
+                        <svg className="w-12 h-12 text-slate-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <rect x="6" y="3" width="12" height="18" rx="2" strokeWidth={1.8} />
+                          <circle cx="12" cy="8" r="2" strokeWidth={1.8} />
+                          <path strokeLinecap="round" strokeWidth={1.8} d="M9 14h6m-6 3h6" />
+                        </svg>
+                      )}
+                      {item.icon === 'filter' && (
+                        <svg className="w-12 h-12 text-slate-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M12 3v18m-7-9h14M8 6h8m-8 12h8" />
+                        </svg>
+                      )}
+                      {item.icon === 'remote' && (
+                        <svg className="w-12 h-12 text-slate-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <rect x="7" y="2" width="10" height="20" rx="3" strokeWidth={1.8} />
+                          <circle cx="12" cy="7" r="1.5" strokeWidth={1.8} />
+                          <circle cx="12" cy="12" r="1.5" strokeWidth={1.8} />
+                          <circle cx="12" cy="17" r="1.5" strokeWidth={1.8} />
+                        </svg>
+                      )}
+                      {item.icon === 'cable' && (
+                        <svg className="w-12 h-12 text-slate-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                        </svg>
+                      )}
+                      {item.icon === 'manual' && (
+                        <svg className="w-12 h-12 text-slate-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                        </svg>
+                      )}
+                    </div>
+                    {/* Blue pill tag at the bottom matching reference */}
+                    <div className="bg-[#5f87ab] text-white py-2 px-3 text-center">
+                      <span className="text-xs font-bold leading-tight block">{item.title}</span>
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
-          ))}
-        </div>
-      </section>
 
-      {/* 7. FLOATING QUICK ACTION PILLS (WhatsApp & Phone as shown in reference) */}
-      <div className="fixed bottom-6 right-6 z-40 flex flex-col gap-3">
+            {/* 5. EXPERT RECOMMENDATIONS (POSITIONED RIGHT HERE ALONGSIDE THE PRODUCT IMAGE AS IN REFERENCE!) */}
+            <div className="pt-6 border-t border-slate-200">
+              <div className="mb-4">
+                <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-400">
+                  CLINICAL & LIFESTYLE ENDORSEMENTS
+                </span>
+                <h3 className="text-xl font-extrabold text-slate-900 mt-0.5 tracking-tight">
+                  Expert Recommended
+                </h3>
+              </div>
+
+              <div className="space-y-4">
+                {EXPERT_RECOMMENDATIONS.map((expert) => (
+                  <div
+                    key={expert.id}
+                    className="bg-slate-50 rounded-2xl border border-slate-200 p-4 flex gap-4 items-start"
+                  >
+                    <img
+                      src={expert.image}
+                      alt={expert.name}
+                      className="w-16 h-16 rounded-xl object-cover flex-shrink-0 border border-slate-200"
+                    />
+                    <div>
+                      <h4 className="font-extrabold text-sm text-slate-900">{expert.name}</h4>
+                      <p className="text-xs font-semibold text-slate-500 mt-0.5">{expert.role}</p>
+                      <p className="text-xs text-slate-600 mt-2 leading-relaxed italic">
+                        &ldquo;{expert.quote}&rdquo;
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        {/* 6. FULL-WIDTH CUSTOMER REVIEWS SECTION (BELOW THE MAIN STICKY SPLIT) */}
+        <section id="reviews-section" className="mt-20 pt-16 border-t border-slate-200">
+          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 mb-10">
+            <div>
+              <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+                Customer Reviews
+              </h2>
+              <p className="text-sm text-slate-500 mt-1">
+                Read real verified stories from homeowners and families.
+              </p>
+            </div>
+            <button
+              onClick={() => setIsReviewModalOpen(true)}
+              className="border-2 border-slate-900 bg-white hover:bg-slate-900 hover:text-white text-slate-900 font-bold text-sm px-6 py-2.5 rounded-full transition-all shadow-sm"
+            >
+              Write a review
+            </button>
+          </div>
+
+          {/* Aggregate Ratings Overview */}
+          <div className="bg-slate-50 rounded-3xl border border-slate-200 p-6 sm:p-8 mb-10 shadow-sm grid grid-cols-1 md:grid-cols-12 gap-8 items-center">
+            {/* Big Score */}
+            <div className="md:col-span-4 flex flex-col items-center md:items-start md:border-r border-slate-200 md:pr-8">
+              <span className="text-5xl font-black text-slate-900 tracking-tight">{product.rating}</span>
+              <div className="flex items-center text-amber-500 my-2">
+                {[...Array(5)].map((_, i) => (
+                  <svg key={i} className="w-5 h-5 fill-current" viewBox="0 0 20 20">
+                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                  </svg>
+                ))}
+              </div>
+              <span className="text-xs text-slate-500 font-semibold">{product.reviewCount} verified ratings</span>
+            </div>
+
+            {/* Histogram distribution */}
+            <div className="md:col-span-8 space-y-2">
+              {[
+                { star: 5, pct: '88%', count: 125 },
+                { star: 4, pct: '9%', count: 13 },
+                { star: 3, pct: '2%', count: 3 },
+                { star: 2, pct: '0%', count: 0 },
+                { star: 1, pct: '1%', count: 1 },
+              ].map((row) => (
+                <div key={row.star} className="flex items-center gap-3 text-xs font-semibold text-slate-600">
+                  <span className="w-12">{row.star} Star</span>
+                  <div className="flex-1 h-2 bg-slate-200 rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-amber-500 rounded-full"
+                      style={{ width: row.pct }}
+                    />
+                  </div>
+                  <span className="w-8 text-right text-slate-400">{row.count}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Customer Review Cards Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {reviewsList.map((rev) => (
+              <div
+                key={rev.id}
+                className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm flex flex-col justify-between"
+              >
+                <div>
+                  {/* Author row */}
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="w-10 h-10 rounded-full bg-slate-100 text-slate-900 font-extrabold text-sm flex items-center justify-center">
+                      {rev.initials}
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-1.5">
+                        <span className="font-bold text-sm text-slate-900">{rev.author}</span>
+                        <span className="text-[10px] font-bold text-slate-500">🇮🇳 IN</span>
+                      </div>
+                      {rev.verified && (
+                        <span className="text-[10px] text-[#2e7d32] font-semibold flex items-center gap-0.5">
+                          <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+                          </svg>
+                          Verified purchase
+                        </span>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Stars */}
+                  <div className="flex items-center text-amber-500 mb-2">
+                    {[...Array(5)].map((_, i) => (
+                      <svg
+                        key={i}
+                        className={`w-3.5 h-3.5 ${i < rev.rating ? 'fill-current' : 'text-slate-200 fill-current'}`}
+                        viewBox="0 0 20 20"
+                      >
+                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                      </svg>
+                    ))}
+                    <span className="text-[10px] text-slate-400 ml-2">{rev.date}</span>
+                  </div>
+
+                  {/* Review Text */}
+                  <p className="text-xs text-slate-700 leading-relaxed">
+                    &ldquo;{rev.comment}&rdquo;
+                  </p>
+                </div>
+
+                {/* Helpful footer */}
+                <div className="pt-4 mt-4 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
+                  <span>Helpful?</span>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => handleVoteHelpful(rev.id)}
+                      className="inline-flex items-center gap-1 hover:text-slate-900 transition-colors"
+                    >
+                      <span>👍</span>
+                      <span className="font-bold">{rev.helpfulCount}</span>
+                    </button>
+                    <button className="inline-flex items-center gap-1 hover:text-slate-900 transition-colors">
+                      <span>👎 0</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      </main>
+
+      {/* 7. STICKY FLOATING BOTTOM BAR (REVEALS AS YOU SCROLL PAST BUY BOX, EXACTLY AS IN REFERENCE SITES) */}
+      <div
+        className={`fixed bottom-0 inset-x-0 z-40 bg-white/95 backdrop-blur-md border-t border-slate-200 px-4 py-3 shadow-2xl transition-all duration-300 transform ${
+          showStickyBottomBar ? 'translate-y-0 opacity-100' : 'translate-y-full opacity-0 pointer-events-none'
+        }`}
+      >
+        <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <img
+              src={`/images/${product.image}`}
+              alt={product.model}
+              className="w-12 h-12 rounded-xl object-contain bg-slate-50 p-1 border border-slate-200"
+            />
+            <div>
+              <p className="text-sm font-bold text-slate-900 leading-tight">{product.model}</p>
+              <p className="text-xs text-slate-500">Color: {selectedColor}</p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-4">
+            <div className="text-right hidden sm:block">
+              <span className="text-lg font-black text-slate-900">{formatINR(product.price)}</span>
+              <span className="text-xs text-slate-400 line-through ml-2">{formatINR(product.originalPrice)}</span>
+            </div>
+
+            <button
+              onClick={handleAddToCart}
+              className="bg-slate-900 hover:bg-black text-white text-sm font-bold py-2.5 px-6 rounded-full shadow-md transition-all flex items-center gap-2"
+            >
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+              </svg>
+              <span>Add To Cart</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* 8. FLOATING QUICK ACTION BUTTONS (WHATSAPP & PHONE) */}
+      <div className="fixed bottom-20 sm:bottom-6 right-6 z-40 flex flex-col gap-3">
         {/* WhatsApp Button */}
         <a
           href="https://wa.me/919876543210?text=Hello%20Kiyoki%20Team%2C%20I%20have%20a%20question%20about%20air%20purifiers"
@@ -1042,13 +1121,13 @@ export function ProductDetailPage({
         </button>
       </div>
 
-      {/* 8. REQUEST A CALLBACK MODAL */}
+      {/* 9. REQUEST A CALLBACK MODAL */}
       {isCallbackModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-          <div className="bg-[#faf7f2] rounded-3xl border border-[#ebdcca] shadow-2xl max-w-md w-full p-6 sm:p-8 relative">
+          <div className="bg-white rounded-3xl border border-slate-200 shadow-2xl max-w-md w-full p-6 sm:p-8 relative">
             <button
               onClick={() => setIsCallbackModalOpen(false)}
-              className="absolute top-5 right-5 text-[#8b8071] hover:text-[#1c1c1e] text-2xl font-bold"
+              className="absolute top-5 right-5 text-slate-400 hover:text-slate-800 text-2xl font-bold"
               aria-label="Close dialog"
             >
               &times;
@@ -1059,8 +1138,8 @@ export function ProductDetailPage({
                 <div className="w-16 h-16 rounded-full bg-[#ecfdf5] text-[#10b981] mx-auto flex items-center justify-center text-3xl mb-4">
                   ✓
                 </div>
-                <h3 className="text-xl font-extrabold text-[#1c1c1e]">Callback Scheduled!</h3>
-                <p className="text-sm text-[#6e6355] mt-2">
+                <h3 className="text-xl font-extrabold text-slate-900">Callback Scheduled!</h3>
+                <p className="text-sm text-slate-600 mt-2">
                   Our clean air specialist will call you within 15 minutes to answer any questions about the {product.model}.
                 </p>
               </div>
@@ -1071,25 +1150,25 @@ export function ProductDetailPage({
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
                   </svg>
                 </div>
-                <h3 className="text-xl font-extrabold text-[#1c1c1e]">Request a Quick Callback</h3>
-                <p className="text-xs text-[#7e7467] mt-1 mb-5">
+                <h3 className="text-xl font-extrabold text-slate-900">Request a Quick Callback</h3>
+                <p className="text-xs text-slate-500 mt-1 mb-5">
                   Need personalized advice on room size or filtration? Enter your contact info below.
                 </p>
 
                 <form onSubmit={handleCallbackSubmit} className="space-y-4">
                   <div>
-                    <label className="block text-xs font-bold text-[#1c1c1e] mb-1">Your Name</label>
+                    <label className="block text-xs font-bold text-slate-800 mb-1">Your Name</label>
                     <input
                       type="text"
                       required
                       placeholder="e.g. Rahul Sharma"
                       value={callbackName}
                       onChange={(e) => setCallbackName(e.target.value)}
-                      className="w-full px-4 py-2.5 rounded-xl border border-[#ebdcca] bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#1c1c1e]"
+                      className="w-full px-4 py-2.5 rounded-xl border border-slate-300 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-slate-900"
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-[#1c1c1e] mb-1">Phone Number (10 Digits)</label>
+                    <label className="block text-xs font-bold text-slate-800 mb-1">Phone Number (10 Digits)</label>
                     <input
                       type="tel"
                       required
@@ -1097,7 +1176,7 @@ export function ProductDetailPage({
                       placeholder="e.g. 9876543210"
                       value={callbackPhone}
                       onChange={(e) => setCallbackPhone(e.target.value)}
-                      className="w-full px-4 py-2.5 rounded-xl border border-[#ebdcca] bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#1c1c1e]"
+                      className="w-full px-4 py-2.5 rounded-xl border border-slate-300 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-slate-900"
                     />
                   </div>
                   <button
@@ -1113,13 +1192,13 @@ export function ProductDetailPage({
         </div>
       )}
 
-      {/* 9. WRITE REVIEW MODAL */}
+      {/* 10. WRITE REVIEW MODAL */}
       {isReviewModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-          <div className="bg-[#faf7f2] rounded-3xl border border-[#ebdcca] shadow-2xl max-w-md w-full p-6 sm:p-8 relative">
+          <div className="bg-white rounded-3xl border border-slate-200 shadow-2xl max-w-md w-full p-6 sm:p-8 relative">
             <button
               onClick={() => setIsReviewModalOpen(false)}
-              className="absolute top-5 right-5 text-[#8b8071] hover:text-[#1c1c1e] text-2xl font-bold"
+              className="absolute top-5 right-5 text-slate-400 hover:text-slate-800 text-2xl font-bold"
               aria-label="Close dialog"
             >
               &times;
@@ -1130,32 +1209,32 @@ export function ProductDetailPage({
                 <div className="w-16 h-16 rounded-full bg-[#ecfdf5] text-[#10b981] mx-auto flex items-center justify-center text-3xl mb-4">
                   ✓
                 </div>
-                <h3 className="text-xl font-extrabold text-[#1c1c1e]">Thank You for Your Feedback!</h3>
-                <p className="text-sm text-[#6e6355] mt-2">
+                <h3 className="text-xl font-extrabold text-slate-900">Thank You for Your Feedback!</h3>
+                <p className="text-sm text-slate-600 mt-2">
                   Your verified review has been recorded and posted.
                 </p>
               </div>
             ) : (
               <div>
-                <h3 className="text-xl font-extrabold text-[#1c1c1e]">Write a Customer Review</h3>
-                <p className="text-xs text-[#7e7467] mt-1 mb-5">
+                <h3 className="text-xl font-extrabold text-slate-900">Write a Customer Review</h3>
+                <p className="text-xs text-slate-500 mt-1 mb-5">
                   Share your real experience with {product.model}.
                 </p>
 
                 <form onSubmit={handleReviewSubmit} className="space-y-4">
                   <div>
-                    <label className="block text-xs font-bold text-[#1c1c1e] mb-1">Your Name</label>
+                    <label className="block text-xs font-bold text-slate-800 mb-1">Your Name</label>
                     <input
                       type="text"
                       required
                       placeholder="e.g. Pooja Mehra"
                       value={reviewName}
                       onChange={(e) => setReviewName(e.target.value)}
-                      className="w-full px-4 py-2.5 rounded-xl border border-[#ebdcca] bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#1c1c1e]"
+                      className="w-full px-4 py-2.5 rounded-xl border border-slate-300 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-slate-900"
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-[#1c1c1e] mb-1">Rating</label>
+                    <label className="block text-xs font-bold text-slate-800 mb-1">Rating</label>
                     <div className="flex items-center gap-2">
                       {[1, 2, 3, 4, 5].map((star) => (
                         <button
@@ -1167,25 +1246,25 @@ export function ProductDetailPage({
                           ★
                         </button>
                       ))}
-                      <span className="text-xs font-bold text-[#1c1c1e] ml-2">
+                      <span className="text-xs font-bold text-slate-900 ml-2">
                         {reviewRating} out of 5
                       </span>
                     </div>
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-[#1c1c1e] mb-1">Your Review</label>
+                    <label className="block text-xs font-bold text-slate-800 mb-1">Your Review</label>
                     <textarea
                       required
                       rows={4}
                       placeholder="How has the purifier changed your room air and sleep quality?"
                       value={reviewComment}
                       onChange={(e) => setReviewComment(e.target.value)}
-                      className="w-full px-4 py-2.5 rounded-xl border border-[#ebdcca] bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#1c1c1e]"
+                      className="w-full px-4 py-2.5 rounded-xl border border-slate-300 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-slate-900"
                     />
                   </div>
                   <button
                     type="submit"
-                    className="w-full bg-[#1c1c1e] hover:bg-black text-white font-bold py-3 rounded-full text-sm shadow-md transition-all"
+                    className="w-full bg-slate-900 hover:bg-black text-white font-bold py-3 rounded-full text-sm shadow-md transition-all"
                   >
                     Post Review
                   </button>
@@ -1196,9 +1275,9 @@ export function ProductDetailPage({
         </div>
       )}
 
-      {/* 10. TOAST NOTIFICATION ON ADD TO CART */}
+      {/* 11. TOAST NOTIFICATION ON ADD TO CART */}
       {addedToast && (
-        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-[#1c1c1e] text-white px-6 py-3 rounded-full shadow-2xl flex items-center gap-3 animate-bounce">
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-slate-900 text-white px-6 py-3 rounded-full shadow-2xl flex items-center gap-3 animate-bounce">
           <span className="text-emerald-400 font-bold">✓</span>
           <span className="text-sm font-semibold">{product.model} added to your cart!</span>
         </div>
@@ -1206,4 +1285,5 @@ export function ProductDetailPage({
     </div>
   );
 }
+
 export default ProductDetailPage;
