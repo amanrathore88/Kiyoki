@@ -251,8 +251,8 @@ export async function initializeAuth(): Promise<void> {
   const users = getStoredUsers();
   const adminExists = users.some((u) => u.email.toLowerCase() === 'admin@kiyoki.com');
   const userExists = users.some((u) => u.email.toLowerCase() === 'user@kiyoki.com');
-
-  if (adminExists && userExists) return;
+  const googleExists = users.some((u) => u.email.toLowerCase() === 'alex.morgan.tech@gmail.com');
+  const appleExists = users.some((u) => u.email.toLowerCase() === 'sarah.connor.apple@icloud.com');
 
   const updatedUsers = [...users];
 
@@ -266,9 +266,24 @@ export async function initializeAuth(): Promise<void> {
       role: 'admin',
       provider: 'email',
       status: 'active',
-      createdAt: new Date().toISOString(),
+      createdAt: new Date(Date.now() - 7 * 86400000).toISOString(),
       lastLogin: new Date().toISOString(),
-      loginCount: 5,
+      loginCount: 12,
+    });
+  }
+
+  if (!googleExists) {
+    updatedUsers.push({
+      id: 'usr_google_001',
+      name: 'Alex Morgan',
+      email: 'alex.morgan.tech@gmail.com',
+      role: 'user',
+      provider: 'google',
+      avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=120&auto=format&fit=crop&q=80',
+      status: 'active',
+      createdAt: new Date(Date.now() - 4 * 86400000).toISOString(),
+      lastLogin: new Date(Date.now() - 3600000).toISOString(),
+      loginCount: 8,
     });
   }
 
@@ -282,13 +297,35 @@ export async function initializeAuth(): Promise<void> {
       role: 'user',
       provider: 'email',
       status: 'active',
-      createdAt: new Date().toISOString(),
-      lastLogin: new Date().toISOString(),
+      createdAt: new Date(Date.now() - 5 * 86400000).toISOString(),
+      lastLogin: new Date(Date.now() - 7200000).toISOString(),
+      loginCount: 5,
+    });
+  }
+
+  if (!appleExists) {
+    updatedUsers.push({
+      id: 'usr_apple_003',
+      name: 'Sarah Connor',
+      email: 'sarah.connor.apple@icloud.com',
+      role: 'user',
+      provider: 'apple',
+      status: 'active',
+      createdAt: new Date(Date.now() - 2 * 86400000).toISOString(),
+      lastLogin: new Date(Date.now() - 14400000).toISOString(),
       loginCount: 3,
     });
   }
 
   saveStoredUsers(updatedUsers);
+
+  // Initialize sample security audit logs if empty
+  const currentLogs = getAuditLogs();
+  if (currentLogs.length === 0) {
+    addAuditLog('LOGIN_SUCCESS', 'alex.morgan.tech@gmail.com', 'User authenticated via Google OAuth SSO.', 'user');
+    addAuditLog('REGISTER_SUCCESS', 'alex.morgan.tech@gmail.com', 'New customer signed up via Google OAuth.', 'user');
+    addAuditLog('LOGIN_SUCCESS', 'admin@kiyoki.com', 'Root Administrator logged into security console.', 'admin');
+  }
 }
 
 // Immediately initialize on load
