@@ -65,8 +65,11 @@ export function App() {
           window.location.hash = '';
         }
       } else if (hash === '#account') {
-        if (currentSession) {
+        const active = getCurrentSession();
+        if (active) {
+          setSession(active);
           setCurrentPage('account');
+          setIsAuthOpen(false);
         } else {
           setAuthInitialMode('login');
           setIsAuthOpen(true);
@@ -98,6 +101,7 @@ export function App() {
         setIsAuthOpen(true);
         return;
       }
+      setIsAuthOpen(false);
       setCurrentPage('admin');
       window.location.hash = '#admin';
       window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -108,6 +112,7 @@ export function App() {
         setIsAuthOpen(true);
         return;
       }
+      setIsAuthOpen(false);
       setCurrentPage('account');
       window.location.hash = '#account';
       window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -124,6 +129,7 @@ export function App() {
 
   const handleAuthSuccess = (newSession: AuthSession) => {
     setSession(newSession);
+    setIsAuthOpen(false);
     // Automatic Role-Based Redirection:
     // If admin enters credentials -> automatically open the Admin Panel!
     // If user enters credentials -> open the User Dashboard!

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { X, Eye, EyeOff, ShieldAlert, CheckCircle2, Lock } from 'lucide-react';
+import { createPortal } from 'react-dom';
+import { X, Eye, EyeOff, ShieldAlert, CheckCircle2, Lock, PlusCircle } from 'lucide-react';
 import {
   login,
   register,
@@ -17,6 +18,47 @@ interface AuthModalProps {
   initialMode?: 'login' | 'register';
 }
 
+interface SocialAccount {
+  name: string;
+  email: string;
+  avatarUrl?: string;
+  badge?: string;
+}
+
+const BROWSER_GOOGLE_ACCOUNTS: SocialAccount[] = [
+  {
+    name: 'Aman Rathore',
+    email: 'amanrathore88@gmail.com',
+    avatarUrl: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=120&auto=format&fit=crop&q=80',
+    badge: 'Signed in on this browser',
+  },
+  {
+    name: 'Alex Morgan',
+    email: 'alex.morgan.tech@gmail.com',
+    avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=120&auto=format&fit=crop&q=80',
+    badge: 'Personal',
+  },
+  {
+    name: 'Amélie Laurent',
+    email: 'amelielaurent7622@gmail.com',
+    avatarUrl: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=120&auto=format&fit=crop&q=80',
+    badge: 'Kiyoki Member',
+  },
+];
+
+const BROWSER_APPLE_ACCOUNTS: SocialAccount[] = [
+  {
+    name: 'Aman Rathore',
+    email: 'aman.rathore@icloud.com',
+    badge: 'Primary Apple ID',
+  },
+  {
+    name: 'Sarah Connor',
+    email: 'sarah.connor.apple@icloud.com',
+    badge: 'Family Sharing',
+  },
+];
+
 export const AuthModal: React.FC<AuthModalProps> = ({
   isOpen,
   onClose,
@@ -29,9 +71,15 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [socialLoading, setSocialLoading] = useState<'google' | 'apple' | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+
+  // Social Account Chooser Picker State ('google' | 'apple' | null)
+  const [accountPicker, setAccountPicker] = useState<'google' | 'apple' | null>(null);
+  const [showCustomInput, setShowCustomInput] = useState(false);
+  const [customName, setCustomName] = useState('');
+  const [customEmail, setCustomEmail] = useState('');
+  const [choosingAccount, setChoosingAccount] = useState<string | null>(null);
 
   // Rate-limiting / lockout state
   const [lockoutSeconds, setLockoutSeconds] = useState<number>(0);
@@ -42,7 +90,9 @@ export const AuthModal: React.FC<AuthModalProps> = ({
       setMode(initialMode);
       setErrorMessage(null);
       setSuccessMessage(null);
-      setSocialLoading(null);
+      setAccountPicker(null);
+      setShowCustomInput(false);
+      setChoosingAccount(null);
       // Check if current typed email is locked
       if (email) {
         const status = checkLockout(email);
@@ -95,7 +145,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           setTimeout(() => {
             onAuthSuccess(res.session!);
             onClose();
-          }, 600);
+          }, 500);
         } else {
           if (res.isLocked && res.remainingSeconds) {
             setLockoutSeconds(res.remainingSeconds);
@@ -109,7 +159,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           setTimeout(() => {
             onAuthSuccess(res.session!);
             onClose();
-          }, 700);
+          }, 600);
         } else {
           setErrorMessage(res.error || 'Failed to create account.');
         }
@@ -129,56 +179,87 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     setLockoutSeconds(lock.remainingSeconds);
   };
 
-  // Google OAuth Login: Instant, Automatic, Seamless (Matching Apple Behavior)
-  const handleGoogleSignIn = async () => {
-    setSocialLoading('google');
+  // Perform Google Login with the selected account
+  const handleSelectGoogleAccount = async (account: SocialAccount) => {
+    setChoosingAccount(account.email);
     setErrorMessage(null);
 
     try {
       const res = await signInWithGoogle({
-        name: 'Alex Morgan',
-        email: 'alex.morgan.tech@gmail.com',
-        avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=120&auto=format&fit=crop&q=80',
+        name: account.name,
+        email: account.email,
+        avatarUrl: account.avatarUrl,
       });
+
       if (res.success && res.session) {
-        setSuccessMessage(`Signed in with Google as ${res.user?.name}! Customer history synchronized.`);
+        setAccountPicker(null);
+        setSuccessMessage(`Signed in as ${account.name} (${account.email}). Synchronizing...`);
         setTimeout(() => {
           onAuthSuccess(res.session!);
           onClose();
-        }, 600);
+        }, 400);
       } else {
-        setErrorMessage(res.error || 'Google sign-in could not be completed.');
+        setErrorMessage(res.error || 'Failed to sign in with Google account.');
       }
     } catch {
-      setErrorMessage('Google authentication service timed out.');
+      setErrorMessage('Google authentication service error. Please try again.');
     } finally {
-      setSocialLoading(null);
+      setChoosingAccount(null);
     }
   };
 
-  // Apple OAuth Login Action
-  const handleAppleSignIn = async () => {
-    setSocialLoading('apple');
+  // Perform Apple Login with the selected account
+  const handleSelectAppleAccount = async (account: SocialAccount) => {
+    setChoosingAccount(account.email);
     setErrorMessage(null);
 
     try {
       const res = await signInWithApple({
-        name: 'Sarah Connor',
-        email: 'sarah.connor.apple@icloud.com',
+        name: account.name,
+        email: account.email,
       });
+
       if (res.success && res.session) {
-        setSuccessMessage('Signed in with Apple ID! Customer history synchronized.');
+        setAccountPicker(null);
+        setSuccessMessage(`Signed in as ${account.name} with Apple ID. Synchronizing...`);
         setTimeout(() => {
           onAuthSuccess(res.session!);
           onClose();
-        }, 600);
+        }, 400);
       } else {
-        setErrorMessage(res.error || 'Apple ID sign-in could not be completed.');
+        setErrorMessage(res.error || 'Failed to sign in with Apple ID.');
       }
     } catch {
-      setErrorMessage('Apple authentication service timed out.');
+      setErrorMessage('Apple ID authentication error. Please try again.');
     } finally {
-      setSocialLoading(null);
+      setChoosingAccount(null);
+    }
+  };
+
+  // Handle custom account entry submission
+  const handleCustomAccountSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const trimmedEmail = customEmail.trim().toLowerCase();
+    const trimmedName = customName.trim() || 'Verified User';
+
+    if (!trimmedEmail || !trimmedEmail.includes('@')) {
+      alert('Please enter a valid email address.');
+      return;
+    }
+
+    if (accountPicker === 'google') {
+      handleSelectGoogleAccount({
+        name: trimmedName,
+        email: trimmedEmail,
+        avatarUrl: `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(trimmedName)}`,
+        badge: 'Custom Google Account',
+      });
+    } else if (accountPicker === 'apple') {
+      handleSelectAppleAccount({
+        name: trimmedName,
+        email: trimmedEmail,
+        badge: 'Custom Apple ID',
+      });
     }
   };
 
@@ -369,7 +450,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               {/* Submit Button (Golden Pill Button) */}
               <button
                 type="submit"
-                disabled={isLoading || lockoutSeconds > 0 || socialLoading !== null}
+                disabled={isLoading || lockoutSeconds > 0}
                 className="w-full rounded-full bg-[#fbc658] hover:bg-[#f6b738] active:scale-[0.99] text-gray-900 font-semibold py-3 sm:py-3.5 text-sm transition-all shadow-sm hover:shadow-md disabled:opacity-60 disabled:cursor-not-allowed mt-2 cursor-pointer flex items-center justify-center gap-2"
               >
                 {isLoading ? (
@@ -379,44 +460,42 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 )}
               </button>
 
-              {/* Social Login Buttons: Apple & Google (Instant Automatic Authentication) */}
+              {/* Social Login Buttons: Apple & Google (Opens Authentic Account Chooser) */}
               <div className="flex items-center gap-3 pt-1">
-                {/* Apple Sign-In Button */}
+                {/* Apple ID Selector Trigger */}
                 <button
                   type="button"
-                  onClick={handleAppleSignIn}
-                  disabled={isLoading || socialLoading !== null}
-                  title="Sign in with Apple ID"
+                  onClick={() => {
+                    setAccountPicker('apple');
+                    setShowCustomInput(false);
+                  }}
+                  disabled={isLoading}
+                  title="Choose an Apple ID to sign in"
                   className="flex-1 rounded-full border border-gray-300/80 bg-white/50 hover:bg-white py-2.5 px-3 flex items-center justify-center gap-2 text-xs font-medium text-gray-800 transition-all shadow-xs cursor-pointer active:scale-98 disabled:opacity-50"
                 >
-                  {socialLoading === 'apple' ? (
-                    <span className="inline-block w-3.5 h-3.5 border-2 border-gray-800 border-t-transparent rounded-full animate-spin" />
-                  ) : (
-                    <svg className="w-3.5 h-3.5 fill-current" viewBox="0 0 170 170">
-                      <path d="M150.37 130.25c-2.45 5.66-5.35 10.87-8.71 15.66-4.58 6.53-8.33 11.05-11.22 13.56-4.48 4.12-9.28 6.23-14.42 6.35-3.69 0-8.14-1.05-13.32-3.18-5.19-2.12-9.97-3.17-14.34-3.17-4.58 0-9.49 1.05-14.75 3.17-5.26 2.13-9.5 3.24-12.74 3.35-4.35.13-9.16-1.9-14.42-6.08-3.7-3.04-7.58-7.77-11.65-14.19-5.99-9.35-10.74-20.08-14.25-32.19-3.51-12.1-5.27-23.36-5.27-33.77 0-14.36 3.69-26.04 11.07-35.03 7.38-8.99 16.59-13.55 27.63-13.68 4.79 0 10.28 1.34 16.48 4.03 6.2 2.68 10.27 4.09 12.21 4.22 1.52-.13 5.89-1.61 13.1-4.44 7.21-2.83 13.17-4.04 17.89-3.63 13.5 1.1 24.37 6.44 32.61 16.02-11.75 7.08-17.5 16.89-17.26 29.43.24 10.15 4.15 18.77 11.74 25.86 7.59 7.08 16.71 11.09 27.35 12.02-2.39 7.39-5.49 15.02-9.29 22.89zM119.22 33.15c0-7.28 2.66-14.18 7.99-20.7 5.33-6.52 11.93-10.76 19.8-12.72.65 1.96.98 3.91.98 5.87 0 7.28-2.77 14.3-8.31 21.05-5.54 6.75-12.28 10.87-20.22 12.35-.11-1.96-.24-3.91-.24-5.85z"/>
-                    </svg>
-                  )}
+                  <svg className="w-3.5 h-3.5 fill-current" viewBox="0 0 170 170">
+                    <path d="M150.37 130.25c-2.45 5.66-5.35 10.87-8.71 15.66-4.58 6.53-8.33 11.05-11.22 13.56-4.48 4.12-9.28 6.23-14.42 6.35-3.69 0-8.14-1.05-13.32-3.18-5.19-2.12-9.97-3.17-14.34-3.17-4.58 0-9.49 1.05-14.75 3.17-5.26 2.13-9.5 3.24-12.74 3.35-4.35.13-9.16-1.9-14.42-6.08-3.7-3.04-7.58-7.77-11.65-14.19-5.99-9.35-10.74-20.08-14.25-32.19-3.51-12.1-5.27-23.36-5.27-33.77 0-14.36 3.69-26.04 11.07-35.03 7.38-8.99 16.59-13.55 27.63-13.68 4.79 0 10.28 1.34 16.48 4.03 6.2 2.68 10.27 4.09 12.21 4.22 1.52-.13 5.89-1.61 13.1-4.44 7.21-2.83 13.17-4.04 17.89-3.63 13.5 1.1 24.37 6.44 32.61 16.02-11.75 7.08-17.5 16.89-17.26 29.43.24 10.15 4.15 18.77 11.74 25.86 7.59 7.08 16.71 11.09 27.35 12.02-2.39 7.39-5.49 15.02-9.29 22.89zM119.22 33.15c0-7.28 2.66-14.18 7.99-20.7 5.33-6.52 11.93-10.76 19.8-12.72.65 1.96.98 3.91.98 5.87 0 7.28-2.77 14.3-8.31 21.05-5.54 6.75-12.28 10.87-20.22 12.35-.11-1.96-.24-3.91-.24-5.85z"/>
+                  </svg>
                   <span>Apple</span>
                 </button>
 
-                {/* Google Sign-In Button: Automatic & Direct */}
+                {/* Google Account Selector Trigger */}
                 <button
                   type="button"
-                  onClick={handleGoogleSignIn}
-                  disabled={isLoading || socialLoading !== null}
-                  title="Sign in with Google automatically"
+                  onClick={() => {
+                    setAccountPicker('google');
+                    setShowCustomInput(false);
+                  }}
+                  disabled={isLoading}
+                  title="Choose a Google account to sign in"
                   className="flex-1 rounded-full border border-gray-300/80 bg-white/50 hover:bg-white py-2.5 px-3 flex items-center justify-center gap-2 text-xs font-medium text-gray-800 transition-all shadow-xs cursor-pointer active:scale-98 disabled:opacity-50"
                 >
-                  {socialLoading === 'google' ? (
-                    <span className="inline-block w-3.5 h-3.5 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
-                  ) : (
-                    <svg className="w-3.5 h-3.5" viewBox="0 0 24 24">
-                      <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-                      <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-                      <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
-                      <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
-                    </svg>
-                  )}
+                  <svg className="w-3.5 h-3.5" viewBox="0 0 24 24">
+                    <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                    <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                    <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+                    <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+                  </svg>
                   <span>Google</span>
                 </button>
               </div>
@@ -517,6 +596,196 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           </div>
         </div>
       </div>
+
+      {/* =========================================================================
+          PRISTINE ACCOUNT CHOOSER DIALOG (RENDERED VIA PORTAL TO BODY)
+          Completely isolated from modal styles, zero overlapping, 100% opaque
+          ========================================================================= */}
+      {accountPicker && createPortal(
+        <div 
+          className="fixed inset-0 z-[99999] flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm animate-fade-in"
+          onClick={() => {
+            setAccountPicker(null);
+            setShowCustomInput(false);
+          }}
+        >
+          <div 
+            className="w-full max-w-[430px] bg-white rounded-3xl shadow-2xl border border-gray-100 overflow-hidden text-gray-900 p-6 sm:p-7 relative select-none animate-scale-up"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Modal Header */}
+            <div className="flex items-center justify-between pb-3.5 border-b border-gray-100">
+              <div className="flex items-center gap-2.5">
+                {accountPicker === 'google' ? (
+                  <>
+                    <svg className="w-5 h-5" viewBox="0 0 24 24">
+                      <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                      <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                      <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+                      <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+                    </svg>
+                    <span className="font-semibold text-gray-800 text-sm tracking-tight">Sign in with Google</span>
+                  </>
+                ) : (
+                  <>
+                    <svg className="w-4 h-4 fill-current text-gray-900" viewBox="0 0 170 170">
+                      <path d="M150.37 130.25c-2.45 5.66-5.35 10.87-8.71 15.66-4.58 6.53-8.33 11.05-11.22 13.56-4.48 4.12-9.28 6.23-14.42 6.35-3.69 0-8.14-1.05-13.32-3.18-5.19-2.12-9.97-3.17-14.34-3.17-4.58 0-9.49 1.05-14.75 3.17-5.26 2.13-9.5 3.24-12.74 3.35-4.35.13-9.16-1.9-14.42-6.08-3.7-3.04-7.58-7.77-11.65-14.19-5.99-9.35-10.74-20.08-14.25-32.19-3.51-12.1-5.27-23.36-5.27-33.77 0-14.36 3.69-26.04 11.07-35.03 7.38-8.99 16.59-13.55 27.63-13.68 4.79 0 10.28 1.34 16.48 4.03 6.2 2.68 10.27 4.09 12.21 4.22 1.52-.13 5.89-1.61 13.1-4.44 7.21-2.83 13.17-4.04 17.89-3.63 13.5 1.1 24.37 6.44 32.61 16.02-11.75 7.08-17.5 16.89-17.26 29.43.24 10.15 4.15 18.77 11.74 25.86 7.59 7.08 16.71 11.09 27.35 12.02-2.39 7.39-5.49 15.02-9.29 22.89zM119.22 33.15c0-7.28 2.66-14.18 7.99-20.7 5.33-6.52 11.93-10.76 19.8-12.72.65 1.96.98 3.91.98 5.87 0 7.28-2.77 14.3-8.31 21.05-5.54 6.75-12.28 10.87-20.22 12.35-.11-1.96-.24-3.91-.24-5.85z"/>
+                    </svg>
+                    <span className="font-semibold text-gray-900 text-sm tracking-tight">Sign in with Apple ID</span>
+                  </>
+                )}
+              </div>
+
+              {/* Close Button */}
+              <button
+                type="button"
+                onClick={() => {
+                  setAccountPicker(null);
+                  setShowCustomInput(false);
+                }}
+                className="w-8 h-8 rounded-full hover:bg-gray-100 flex items-center justify-center text-gray-500 hover:text-black transition-colors cursor-pointer"
+                aria-label="Close dialog"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Instruction Title */}
+            <div className="mt-4 mb-3">
+              <h3 className="text-lg font-bold text-gray-900 leading-snug">
+                {accountPicker === 'google' ? 'Choose an account' : 'Choose an Apple ID'}
+              </h3>
+              <p className="text-xs text-gray-500 mt-0.5">
+                to continue to <span className="font-semibold text-gray-800">Kiyoki Pure Air</span>
+              </p>
+            </div>
+
+            {/* Available Accounts List */}
+            <div className="divide-y divide-gray-100">
+              {(accountPicker === 'google' ? BROWSER_GOOGLE_ACCOUNTS : BROWSER_APPLE_ACCOUNTS).map((acc) => (
+                <button
+                  key={acc.email}
+                  type="button"
+                  disabled={choosingAccount !== null}
+                  onClick={() => {
+                    if (accountPicker === 'google') {
+                      handleSelectGoogleAccount(acc);
+                    } else {
+                      handleSelectAppleAccount(acc);
+                    }
+                  }}
+                  className="w-full py-3 px-2 flex items-center gap-3.5 hover:bg-gray-50/90 rounded-2xl transition-all text-left cursor-pointer group disabled:opacity-60"
+                >
+                  {/* Account Avatar */}
+                  {acc.avatarUrl ? (
+                    <img
+                      src={acc.avatarUrl}
+                      alt={acc.name}
+                      className="w-10 h-10 rounded-full object-cover border border-gray-200 shrink-0"
+                    />
+                  ) : (
+                    <div className="w-10 h-10 rounded-full bg-gray-100 text-gray-800 font-bold text-sm flex items-center justify-center border border-gray-200 shrink-0">
+                      {acc.name.charAt(0)}
+                    </div>
+                  )}
+
+                  {/* Account Info */}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between">
+                      <p className="text-sm font-semibold text-gray-900 truncate group-hover:text-black">
+                        {acc.name}
+                      </p>
+                      {acc.badge && (
+                        <span className="text-[10px] font-medium text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200 shrink-0">
+                          {acc.badge}
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-xs text-gray-500 truncate mt-0.5 font-mono">
+                      {acc.email}
+                    </p>
+                  </div>
+
+                  {/* Loading Spinner or Arrow */}
+                  {choosingAccount === acc.email ? (
+                    <span className="w-4 h-4 border-2 border-gray-900 border-t-transparent rounded-full animate-spin shrink-0" />
+                  ) : (
+                    <span className="text-gray-300 group-hover:text-gray-600 text-sm shrink-0">
+                      &rarr;
+                    </span>
+                  )}
+                </button>
+              ))}
+            </div>
+
+            {/* "Use Another Account" Accordion */}
+            <div className="mt-3 pt-3 border-t border-gray-100">
+              {!showCustomInput ? (
+                <button
+                  type="button"
+                  onClick={() => setShowCustomInput(true)}
+                  className="w-full py-2.5 px-3 rounded-2xl border border-dashed border-gray-300 hover:border-gray-500 hover:bg-gray-50/80 text-xs font-medium text-gray-700 flex items-center justify-center gap-2 transition-all cursor-pointer"
+                >
+                  <PlusCircle className="w-3.5 h-3.5 text-gray-500" />
+                  <span>
+                    {accountPicker === 'google' ? 'Use another Google account' : 'Use another Apple ID'}
+                  </span>
+                </button>
+              ) : (
+                <form onSubmit={handleCustomAccountSubmit} className="p-3 bg-gray-50 rounded-2xl border border-gray-200 space-y-2.5 animate-fade-in">
+                  <div className="text-[11px] font-semibold text-gray-700">
+                    Enter your email ID:
+                  </div>
+                  <input
+                    type="text"
+                    required
+                    placeholder="Your Full Name"
+                    value={customName}
+                    onChange={(e) => setCustomName(e.target.value)}
+                    className="w-full text-xs px-3.5 py-2.5 rounded-xl bg-white border border-gray-300 focus:outline-none focus:border-amber-400 text-gray-900 placeholder:text-gray-400"
+                  />
+                  <input
+                    type="email"
+                    required
+                    placeholder={accountPicker === 'google' ? 'yourname@gmail.com' : 'yourname@icloud.com'}
+                    value={customEmail}
+                    onChange={(e) => setCustomEmail(e.target.value)}
+                    className="w-full text-xs px-3.5 py-2.5 rounded-xl bg-white border border-gray-300 focus:outline-none focus:border-amber-400 text-gray-900 placeholder:text-gray-400 font-mono"
+                  />
+                  <div className="flex items-center gap-2 pt-1">
+                    <button
+                      type="submit"
+                      disabled={choosingAccount !== null}
+                      className="flex-1 py-2 px-3 rounded-xl bg-[#fbc658] hover:bg-[#f6b738] text-gray-950 font-semibold text-xs transition-colors shadow-sm cursor-pointer flex items-center justify-center gap-1.5"
+                    >
+                      {choosingAccount ? (
+                        <span className="w-3.5 h-3.5 border-2 border-gray-900 border-t-transparent rounded-full animate-spin" />
+                      ) : (
+                        <span>Sign in with this account</span>
+                      )}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setShowCustomInput(false)}
+                      className="py-2 px-3 rounded-xl text-xs text-gray-600 hover:text-black cursor-pointer"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </form>
+              )}
+            </div>
+
+            {/* Disclaimer Footer */}
+            <div className="mt-4 pt-3 border-t border-gray-100 text-[10px] text-gray-400 text-center leading-relaxed">
+              {accountPicker === 'google'
+                ? 'To continue, Google will share your name, email address, language preference, and profile picture with Kiyoki.'
+                : 'To continue, Apple will share your name and email address with Kiyoki.'}
+            </div>
+          </div>
+        </div>,
+        document.body
+      )}
     </div>
   );
 };
