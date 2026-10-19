@@ -11,37 +11,135 @@ import { Footer } from './components/Footer';
 import { SearchModal } from './components/SearchModal';
 import { CartDrawer, CartItem } from './components/CartDrawer';
 import { ShopPage } from './components/ShopPage';
+import { AuthModal } from './components/AuthModal';
+import { AdminPortal } from './components/AdminPortal';
+import { UserDashboard } from './components/UserDashboard';
+import { getCurrentSession, logout, type AuthSession, addAuditLog } from './services/authService';
 import { type Product } from './shopData';
 
 export function App() {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isCartOpen, setIsCartOpen] = useState(false);
+  const [isAuthOpen, setIsAuthOpen] = useState(false);
+  const [authInitialMode, setAuthInitialMode] = useState<'login' | 'register'>('login');
+  const [session, setSession] = useState<AuthSession | null>(() => getCurrentSession());
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
-  const [currentPage, setCurrentPage] = useState<'home' | 'shop'>(() => {
-    return window.location.hash === '#shop' ? 'shop' : 'home';
+
+  // Navigation pages: 'home' | 'shop' | 'admin' | 'account'
+  const [currentPage, setCurrentPage] = useState<'home' | 'shop' | 'admin' | 'account'>(() => {
+    const hash = window.location.hash;
+    const currentSession = getCurrentSession();
+    if (hash === '#shop') return 'shop';
+    if (hash === '#admin') {
+      return currentSession?.user.role === 'admin' ? 'admin' : 'home';
+    }
+    if (hash === '#account') {
+      return currentSession ? 'account' : 'home';
+    }
+    return 'home';
   });
 
+  // URL Hash Synchronizer with Role-Based Guards
   useEffect(() => {
     const handleHashChange = () => {
-      if (window.location.hash === '#shop') {
+      const hash = window.location.hash;
+      const currentSession = getCurrentSession();
+      setSession(currentSession);
+
+      if (hash === '#shop') {
         setCurrentPage('shop');
+      } else if (hash === '#admin') {
+        // Enforce Admin Role Guard
+        if (currentSession && currentSession.user.role === 'admin') {
+          setCurrentPage('admin');
+        } else {
+          // Block unauthorized direct URL access
+          addAuditLog(
+            'UNAUTHORIZED_ACCESS',
+            currentSession ? currentSession.user.email : 'anonymous',
+            'Attempted unauthorized direct URL navigation to #admin portal.'
+          );
+          setAuthInitialMode('login');
+          setIsAuthOpen(true);
+          setCurrentPage('home');
+          window.location.hash = '';
+        }
+      } else if (hash === '#account') {
+        if (currentSession) {
+          setCurrentPage('account');
+        } else {
+          setAuthInitialMode('login');
+          setIsAuthOpen(true);
+          setCurrentPage('home');
+          window.location.hash = '';
+        }
+      } else if (hash === '#login') {
+        setAuthInitialMode('login');
+        setIsAuthOpen(true);
+        setCurrentPage('home');
+      } else if (hash === '#register') {
+        setAuthInitialMode('register');
+        setIsAuthOpen(true);
+        setCurrentPage('home');
       } else {
         setCurrentPage('home');
       }
     };
+
     window.addEventListener('hashchange', handleHashChange);
     return () => window.removeEventListener('hashchange', handleHashChange);
   }, []);
 
-  const handleNavigate = (page: 'home' | 'shop') => {
-    setCurrentPage(page);
-    if (page === 'shop') {
+  const handleNavigate = (page: 'home' | 'shop' | 'admin' | 'account') => {
+    if (page === 'admin') {
+      const currentSession = getCurrentSession();
+      if (!currentSession || currentSession.user.role !== 'admin') {
+        setAuthInitialMode('login');
+        setIsAuthOpen(true);
+        return;
+      }
+      setCurrentPage('admin');
+      window.location.hash = '#admin';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else if (page === 'account') {
+      const currentSession = getCurrentSession();
+      if (!currentSession) {
+        setAuthInitialMode('login');
+        setIsAuthOpen(true);
+        return;
+      }
+      setCurrentPage('account');
+      window.location.hash = '#account';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else if (page === 'shop') {
+      setCurrentPage('shop');
       window.location.hash = '#shop';
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } else {
+      setCurrentPage('home');
       window.location.hash = '';
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
+  };
+
+  const handleAuthSuccess = (newSession: AuthSession) => {
+    setSession(newSession);
+    // Automatic Role-Based Redirection:
+    // If admin enters credentials -> automatically open the Admin Panel!
+    // If user enters credentials -> open the User Dashboard!
+    if (newSession.user.role === 'admin') {
+      setCurrentPage('admin');
+      window.location.hash = '#admin';
+    } else {
+      setCurrentPage('account');
+      window.location.hash = '#account';
+    }
+  };
+
+  const handleLogout = () => {
+    logout();
+    setSession(null);
+    handleNavigate('home');
   };
 
   const handleShopClick = () => {
@@ -95,18 +193,41 @@ export function App() {
   };
 
   return (
-    <div className="w-full bg-white text-gray-900 font-sans selection:bg-sky-brand selection:text-white flex flex-col overflow-x-hidden">
+    <div className="w-full bg-white text-gray-900 font-sans selection:bg-sky-brand selection:text-white flex flex-col overflow-x-hidden min-h-screen">
       {/* 01. GLOBAL HEADER / NAVIGATION (88px) */}
       <Header
         onOpenSearch={() => setIsSearchOpen(true)}
         onOpenCart={() => setIsCartOpen(true)}
+        onOpenAuth={() => {
+          setAuthInitialMode('login');
+          setIsAuthOpen(true);
+        }}
         cartCount={cartItems.reduce((acc, item) => acc + item.quantity, 0)}
         currentPage={currentPage}
         onNavigate={handleNavigate}
+        session={session}
+        onLogout={handleLogout}
       />
 
-      {/* CONDITIONAL CONTENT: SHOP PAGE OR HOME PAGE SECTIONS */}
-      {currentPage === 'shop' ? (
+      {/* CONDITIONAL CONTENT: ADMIN PORTAL, USER DASHBOARD, SHOP PAGE OR HOME PAGE */}
+      {currentPage === 'admin' ? (
+        <main className="w-full">
+          <AdminPortal
+            session={session}
+            onLogout={handleLogout}
+            onNavigateHome={() => handleNavigate('home')}
+          />
+        </main>
+      ) : currentPage === 'account' ? (
+        <main className="w-full">
+          <UserDashboard
+            session={session}
+            onLogout={handleLogout}
+            onNavigateHome={() => handleNavigate('home')}
+            onNavigateShop={() => handleNavigate('shop')}
+          />
+        </main>
+      ) : currentPage === 'shop' ? (
         <main className="w-full">
           <ShopPage onAddToCart={handleAddProductToCart} />
         </main>
@@ -196,11 +317,17 @@ export function App() {
       )}
 
       {/* GLOBAL FOOTER (Full-Width Solid Black Footer) */}
-      <Footer
-        onOpenSearch={() => setIsSearchOpen(true)}
-        onOpenCart={() => setIsCartOpen(true)}
-        onNavigate={handleNavigate}
-      />
+      {currentPage !== 'admin' && (
+        <Footer
+          onOpenSearch={() => setIsSearchOpen(true)}
+          onOpenCart={() => setIsCartOpen(true)}
+          onOpenAuth={() => {
+            setAuthInitialMode('login');
+            setIsAuthOpen(true);
+          }}
+          onNavigate={handleNavigate}
+        />
+      )}
 
       {/* Quick Search Modal */}
       <SearchModal
@@ -215,6 +342,14 @@ export function App() {
         items={cartItems}
         onRemoveItem={handleRemoveItem}
         onUpdateQuantity={handleUpdateQuantity}
+      />
+
+      {/* Full-Feature Authentication Modal */}
+      <AuthModal
+        isOpen={isAuthOpen}
+        onClose={() => setIsAuthOpen(false)}
+        onAuthSuccess={handleAuthSuccess}
+        initialMode={authInitialMode}
       />
     </div>
   );

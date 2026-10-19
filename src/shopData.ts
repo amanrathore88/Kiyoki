@@ -9,6 +9,7 @@ export type Product = {
   badge: string;
   room: string;
   image: string;
+  images?: string[];
   highlights: [string, string, string];
   description: string;
 };
@@ -22,6 +23,7 @@ export const PRODUCTS: Product[] = [
     badge: 'Best for Bedrooms',
     room: 'Small rooms',
     image: 'product-x3.webp',
+    images: ['product-x3.webp', 'purifier_x3.png', 'product_x3_bedroom.jpg', 'room-small.webp'],
     highlights: ['Ideal for bedrooms & small rooms', 'Ultra-quiet performance', 'True HEPA filtration'],
     description: 'A compact purifier made for the places where you relax, sleep, and unwind.',
   },
@@ -33,6 +35,7 @@ export const PRODUCTS: Product[] = [
     badge: 'Most Popular',
     room: 'Medium rooms',
     image: 'product-x5.webp',
+    images: ['product-x5.webp', 'purifier_x5.png', 'product_studio_gym.jpg', 'room-medium.webp'],
     highlights: ['Ideal for medium-sized rooms', 'Smart control & air quality indicator', 'True HEPA filtration'],
     description: 'Everyday performance designed to complement the modern family home.',
   },
@@ -44,6 +47,7 @@ export const PRODUCTS: Product[] = [
     badge: 'Best for Large Spaces',
     room: 'Large rooms',
     image: 'product-x8.webp',
+    images: ['product-x8.webp', 'purifier_x8.png', 'product_x8_living.jpg', 'room-large.webp'],
     highlights: ['Ideal for large rooms & open spaces', 'High CADR for faster purification', 'True HEPA filtration'],
     description: 'High-capacity air care for spacious living rooms and open-plan spaces.',
   },

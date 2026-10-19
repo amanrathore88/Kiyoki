@@ -5,7 +5,7 @@ import '../ShopPage.css';
 type IconName =
   | 'search' | 'user' | 'cart' | 'menu' | 'close' | 'arrow' | 'leaf' | 'volume'
   | 'house' | 'filter' | 'wifi' | 'bed' | 'crown' | 'building' | 'wind'
-  | 'minus' | 'plus' | 'trash' | 'check';
+  | 'minus' | 'plus' | 'trash' | 'check' | 'heart' | 'heartFilled' | 'chevronLeft' | 'chevronRight';
 
 function Icon({ name, size = 22, strokeWidth = 1.65 }: { name: IconName; size?: number; strokeWidth?: number }) {
   const paths: Record<IconName, ReactNode> = {
@@ -28,6 +28,10 @@ function Icon({ name, size = 22, strokeWidth = 1.65 }: { name: IconName; size?: 
     plus: <path d="M5 12h14M12 5v14"/>,
     trash: <><path d="M4 7h16M9 7V4h6v3M7 7l1 14h8l1-14M10 11v7M14 11v7"/></>,
     check: <path d="m4 12 5 5L20 6"/>,
+    heart: <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/>,
+    heartFilled: <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" fill="currentColor"/>,
+    chevronLeft: <path d="m15 18-6-6 6-6"/>,
+    chevronRight: <path d="m9 18 6-6-6-6"/>,
   };
   return (
     <svg
@@ -43,6 +47,206 @@ function Icon({ name, size = 22, strokeWidth = 1.65 }: { name: IconName; size?: 
     >
       {paths[name]}
     </svg>
+  );
+}
+
+interface ModernProductCardProps {
+  product: Product;
+  asset: (filename: string) => string;
+  onOpen: (product: Product) => void;
+}
+
+function ModernProductCard({ product, asset, onOpen }: ModernProductCardProps) {
+  const images = product.images && product.images.length > 0 ? product.images : [product.image];
+  const [activeImageIndex, setActiveImageIndex] = useState(0);
+  const [isHovered, setIsHovered] = useState(false);
+  const [isFavorited, setIsFavorited] = useState(false);
+
+  // Dynamic image cycling every 3.5 seconds, paused when hovered
+  useEffect(() => {
+    if (images.length <= 1 || isHovered) return;
+    const interval = window.setInterval(() => {
+      setActiveImageIndex((prev) => (prev + 1) % images.length);
+    }, 3500);
+    return () => window.clearInterval(interval);
+  }, [images.length, isHovered]);
+
+  const handlePrev = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setActiveImageIndex((prev) => (prev - 1 + images.length) % images.length);
+  };
+
+  const handleNext = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setActiveImageIndex((prev) => (prev + 1) % images.length);
+  };
+
+  const handleDotClick = (e: React.MouseEvent, idx: number) => {
+    e.stopPropagation();
+    setActiveImageIndex(idx);
+  };
+
+  const handleHeartClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setIsFavorited((prev) => !prev);
+  };
+
+  const badgeIcon: IconName =
+    product.id === 'x3' ? 'bed' : product.id === 'x5' ? 'crown' : 'building';
+
+  return (
+    <article
+      className="ky-mod-card"
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      onClick={() => onOpen(product)}
+      tabIndex={0}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          if (e.target === e.currentTarget) {
+            e.preventDefault();
+            onOpen(product);
+          }
+        }
+      }}
+      aria-label={`${product.model} air purifier`}
+    >
+      {/* 1. Media Stage with Inset Rounded Frame */}
+      <div className="ky-mod-card__media">
+        {/* Floating Top-Left Category Badge */}
+        <span className="ky-mod-card__badge">
+          <Icon name={badgeIcon} size={14} strokeWidth={2} />
+          <span>{product.badge}</span>
+        </span>
+
+        {/* Floating Top-Right Wishlist Heart Button */}
+        <button
+          type="button"
+          className={`ky-mod-card__heart ${isFavorited ? 'is-active' : ''}`}
+          onClick={handleHeartClick}
+          aria-label={isFavorited ? `Remove ${product.model} from wishlist` : `Add ${product.model} to wishlist`}
+        >
+          <Icon name={isFavorited ? 'heartFilled' : 'heart'} size={17} strokeWidth={1.9} />
+        </button>
+
+        {/* Dynamic Image Views (Smooth cross-fade opacity transition) */}
+        <div className="ky-mod-card__img-track">
+          {images.map((img, idx) => {
+            const isLifestyle =
+              img.includes('room') ||
+              img.includes('bedroom') ||
+              img.includes('living') ||
+              img.includes('gym') ||
+              img.includes('lifestyle');
+
+            return (
+              <img
+                key={img}
+                src={asset(img)}
+                alt={`${product.model} view ${idx + 1}`}
+                className={`ky-mod-card__img ${isLifestyle ? 'ky-mod-card__img--cover' : 'ky-mod-card__img--contain'} ${
+                  idx === activeImageIndex ? 'is-active' : ''
+                }`}
+                loading={idx === 0 ? 'eager' : 'lazy'}
+              />
+            );
+          })}
+        </div>
+
+        {/* Chevrons on Hover for Manual View Navigation */}
+        {images.length > 1 && (
+          <div className="ky-mod-card__nav" aria-hidden={!isHovered}>
+            <button
+              type="button"
+              className="ky-mod-card__nav-btn ky-mod-card__nav-btn--prev"
+              onClick={handlePrev}
+              aria-label="Previous view"
+            >
+              <Icon name="chevronLeft" size={16} strokeWidth={2.4} />
+            </button>
+            <button
+              type="button"
+              className="ky-mod-card__nav-btn ky-mod-card__nav-btn--next"
+              onClick={handleNext}
+              aria-label="Next view"
+            >
+              <Icon name="chevronRight" size={16} strokeWidth={2.4} />
+            </button>
+          </div>
+        )}
+
+        {/* View Dots Indicator */}
+        {images.length > 1 && (
+          <div className="ky-mod-card__dots" role="tablist" aria-label="Views">
+            {images.map((_, idx) => (
+              <button
+                key={idx}
+                type="button"
+                className={`ky-mod-card__dot ${idx === activeImageIndex ? 'is-active' : ''}`}
+                onClick={(e) => handleDotClick(e, idx)}
+                aria-label={`Show view ${idx + 1}`}
+              />
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* 2. Card Body Content */}
+      <div className="ky-mod-card__body">
+        {/* Model Title & Room Pill */}
+        <div className="ky-mod-card__header">
+          <h3 className="ky-mod-card__title">{product.model}</h3>
+          <span className="ky-mod-card__room-tag">{product.room}</span>
+        </div>
+
+        {/* Subtitle */}
+        <p className="ky-mod-card__subtitle">{product.subtitle}</p>
+
+        {/* Key Product Details / Highlights */}
+        <div className="ky-mod-card__specs">
+          {product.highlights.map((highlight, index) => {
+            const specIcon: IconName =
+              index === 0
+                ? 'house'
+                : index === 1
+                ? product.id === 'x5'
+                  ? 'wifi'
+                  : product.id === 'x8'
+                  ? 'wind'
+                  : 'volume'
+                : 'filter';
+
+            return (
+              <div key={highlight} className="ky-mod-card__spec-item">
+                <span className="ky-mod-card__spec-icon">
+                  <Icon name={specIcon} size={14} strokeWidth={2} />
+                </span>
+                <span className="ky-mod-card__spec-text">{highlight}</span>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Bottom Action Row: Pricing & Buy Pill Button */}
+        <div className="ky-mod-card__footer">
+          <div className="ky-mod-card__pricing">
+            <span className="ky-mod-card__price-label">Starting at</span>
+            <strong className="ky-mod-card__price-val">{formatINR(product.price)}</strong>
+          </div>
+          <button
+            type="button"
+            className="ky-mod-card__btn-pill"
+            onClick={(e) => {
+              e.stopPropagation();
+              onOpen(product);
+            }}
+          >
+            <span>Buy</span>
+            <Icon name="arrow" size={15} strokeWidth={2.4} />
+          </button>
+        </div>
+      </div>
+    </article>
   );
 }
 
@@ -190,65 +394,12 @@ export function ShopPage({
         </div>
         <div className="ky-product-grid">
           {PRODUCTS.map((product) => (
-            <article className="ky-product" key={product.id}>
-              <button
-                type="button"
-                className="ky-product__picture"
-                onClick={() => showProduct(product)}
-                aria-label={`View ${product.model} details`}
-              >
-                <img src={asset(product.image)} alt={`${product.model} air purifier`} loading="lazy" />
-                <span className="ky-product__badge">
-                  <Icon
-                    name={product.id === 'x3' ? 'bed' : product.id === 'x5' ? 'crown' : 'building'}
-                    size={16}
-                  />
-                  {product.badge}
-                </span>
-                <span className="ky-product__hover-tag">
-                  Discover {product.model} <Icon name="arrow" size={14} />
-                </span>
-              </button>
-              <div className="ky-product__body">
-                <div className="ky-product__topline">
-                  <h3>{product.model}</h3>
-                  <span>{product.room}</span>
-                </div>
-                <p className="ky-product__subtitle">{product.subtitle}</p>
-                <div className="ky-product__price">
-                  <span>Starting at</span>
-                  <strong>{formatINR(product.price)}</strong>
-                </div>
-                <div className="ky-product__highlights">
-                  {product.highlights.map((highlight, index) => (
-                    <div key={highlight}>
-                      <Icon
-                        name={
-                          index === 0
-                            ? 'house'
-                            : index === 1
-                            ? product.id === 'x5'
-                              ? 'wifi'
-                              : product.id === 'x8'
-                              ? 'wind'
-                              : 'volume'
-                            : 'filter'
-                        }
-                        size={19}
-                      />
-                      <span>{highlight}</span>
-                    </div>
-                  ))}
-                </div>
-                <button
-                  type="button"
-                  className="ky-btn ky-btn--primary ky-product__button"
-                  onClick={() => showProduct(product)}
-                >
-                  View Product <Icon name="arrow" size={18} />
-                </button>
-              </div>
-            </article>
+            <ModernProductCard
+              key={product.id}
+              product={product}
+              asset={asset}
+              onOpen={showProduct}
+            />
           ))}
         </div>
       </section>
