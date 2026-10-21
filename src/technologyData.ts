@@ -54,7 +54,7 @@ export const TECHNOLOGY_DATA = {
     title: 'The Science of Purified Air',
     description: 'Advanced 5-stage filtration. Intelligent sensing. Cleaner air for a healthier, brighter tomorrow.',
     buttonText: 'Explore Our Technology',
-    image: '/images/technology/hero-molecules.png',
+    image: '/images/technology/kiyoki-technology-hero.webp',
   },
 
   sciencePanel: {
