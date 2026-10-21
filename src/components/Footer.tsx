@@ -5,7 +5,7 @@ interface FooterProps {
   onOpenSearch?: () => void;
   onOpenCart?: () => void;
   onOpenAuth?: () => void;
-  onNavigate?: (page: 'home' | 'shop' | 'product' | 'admin' | 'account') => void;
+  onNavigate?: (page: 'home' | 'shop' | 'product' | 'admin' | 'account' | 'technology') => void;
 }
 
 export const Footer: React.FC<FooterProps> = ({
@@ -46,6 +46,13 @@ export const Footer: React.FC<FooterProps> = ({
   };
 
   const handleNavClick = (href: string, label: string) => {
+    if (label === 'Technology' || label === 'Air Quality') {
+      if (onNavigate) {
+        onNavigate('technology');
+        return;
+      }
+    }
+
     if (label === 'Air Purifiers' || label === 'Filters' || label === 'Accessories' || label === 'Compare Models' || label === 'Refurbished Products') {
       if (onNavigate) {
         onNavigate('shop');

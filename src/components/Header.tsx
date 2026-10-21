@@ -8,8 +8,8 @@ interface HeaderProps {
   onOpenCart: () => void;
   onOpenAuth: () => void;
   cartCount?: number;
-  currentPage?: 'home' | 'shop' | 'product' | 'admin' | 'account';
-  onNavigate?: (page: 'home' | 'shop' | 'product' | 'admin' | 'account') => void;
+  currentPage?: 'home' | 'shop' | 'product' | 'admin' | 'account' | 'technology';
+  onNavigate?: (page: 'home' | 'shop' | 'product' | 'admin' | 'account' | 'technology') => void;
   session?: AuthSession | null;
   onLogout?: () => void;
 }
@@ -52,16 +52,13 @@ export const Header: React.FC<HeaderProps> = ({
     e.preventDefault();
     if (linkName === 'Shop') {
       onNavigate?.('shop');
+    } else if (linkName === 'Technology') {
+      onNavigate?.('technology');
+    } else if (linkName === 'Air Quality') {
+      onNavigate?.('technology');
     } else if (linkName === 'Purifiers') {
       if (currentPage === 'shop') {
         const el = document.getElementById('products');
-        if (el) el.scrollIntoView({ behavior: 'smooth' });
-      } else {
-        onNavigate?.('home');
-      }
-    } else if (linkName === 'Technology') {
-      if (currentPage === 'shop') {
-        const el = document.getElementById('technology');
         if (el) el.scrollIntoView({ behavior: 'smooth' });
       } else {
         onNavigate?.('home');
@@ -107,8 +104,9 @@ export const Header: React.FC<HeaderProps> = ({
               href={link.href}
               onClick={(e) => handleNavClick(e, link.name)}
               className={`text-[14px] lg:text-[15px] font-medium transition-colors duration-200 tracking-normal ${
-                currentPage === 'shop' && link.name === 'Shop'
-                  ? 'text-sky-brand'
+                (currentPage === 'shop' && link.name === 'Shop') ||
+                (currentPage === 'technology' && (link.name === 'Technology' || link.name === 'Air Quality'))
+                  ? 'text-sky-brand font-semibold'
                   : 'text-gray-800 hover:text-sky-brand'
               }`}
             >
@@ -252,8 +250,9 @@ export const Header: React.FC<HeaderProps> = ({
                   handleNavClick(e, link.name);
                 }}
                 className={`text-[15px] font-medium py-1.5 border-b border-gray-50 transition-colors ${
-                  currentPage === 'shop' && link.name === 'Shop'
-                    ? 'text-sky-brand'
+                  (currentPage === 'shop' && link.name === 'Shop') ||
+                  (currentPage === 'technology' && (link.name === 'Technology' || link.name === 'Air Quality'))
+                    ? 'text-sky-brand font-semibold'
                     : 'text-gray-800'
                 }`}
               >

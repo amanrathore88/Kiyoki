@@ -15,6 +15,7 @@ import { AuthModal } from './components/AuthModal';
 import { AdminPortal } from './components/AdminPortal';
 import { UserDashboard } from './components/UserDashboard';
 import { ProductDetailPage } from './components/ProductDetailPage';
+import { TechnologyPage } from './components/TechnologyPage';
 import { getCurrentSession, logout, type AuthSession, addAuditLog } from './services/authService';
 import { PRODUCTS, type Product } from './shopData';
 
@@ -38,12 +39,14 @@ export function App() {
     return PRODUCTS[0];
   });
 
-  // Navigation pages: 'home' | 'shop' | 'product' | 'admin' | 'account'
-  const [currentPage, setCurrentPage] = useState<'home' | 'shop' | 'product' | 'admin' | 'account'>(() => {
+  // Navigation pages: 'home' | 'shop' | 'product' | 'admin' | 'account' | 'technology'
+  const [currentPage, setCurrentPage] = useState<'home' | 'shop' | 'product' | 'admin' | 'account' | 'technology'>(() => {
     const hash = window.location.hash;
+    const pathname = window.location.pathname;
     const currentSession = getCurrentSession();
     if (hash.startsWith('#product')) return 'product';
-    if (hash === '#shop') return 'shop';
+    if (hash === '#shop' || pathname === '/shop') return 'shop';
+    if (hash === '#technology' || pathname === '/technology') return 'technology';
     if (hash === '#admin') {
       return currentSession?.user.role === 'admin' ? 'admin' : 'home';
     }
@@ -57,6 +60,7 @@ export function App() {
   useEffect(() => {
     const handleHashChange = () => {
       const hash = window.location.hash;
+      const pathname = window.location.pathname;
       const currentSession = getCurrentSession();
       setSession(currentSession);
 
@@ -67,8 +71,10 @@ export function App() {
           if (found) setSelectedProduct(found);
         }
         setCurrentPage('product');
-      } else if (hash === '#shop') {
+      } else if (hash === '#shop' || pathname === '/shop') {
         setCurrentPage('shop');
+      } else if (hash === '#technology' || pathname === '/technology') {
+        setCurrentPage('technology');
       } else if (hash === '#admin') {
         // Enforce Admin Role Guard
         if (currentSession && currentSession.user.role === 'admin') {
@@ -114,7 +120,7 @@ export function App() {
     return () => window.removeEventListener('hashchange', handleHashChange);
   }, []);
 
-  const handleNavigate = (page: 'home' | 'shop' | 'product' | 'admin' | 'account') => {
+  const handleNavigate = (page: 'home' | 'shop' | 'product' | 'admin' | 'account' | 'technology') => {
     if (page === 'admin') {
       const currentSession = getCurrentSession();
       if (!currentSession || currentSession.user.role !== 'admin') {
@@ -140,6 +146,10 @@ export function App() {
     } else if (page === 'shop') {
       setCurrentPage('shop');
       window.location.hash = '#shop';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else if (page === 'technology') {
+      setCurrentPage('technology');
+      window.location.hash = '#technology';
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } else if (page === 'product') {
       setCurrentPage('product');
@@ -275,6 +285,10 @@ export function App() {
             onNavigateShop={() => handleNavigate('shop')}
             onSelectProduct={handleOpenProduct}
           />
+        </main>
+      ) : currentPage === 'technology' ? (
+        <main className="w-full">
+          <TechnologyPage onNavigate={handleNavigate} />
         </main>
       ) : currentPage === 'shop' ? (
         <main className="w-full">
