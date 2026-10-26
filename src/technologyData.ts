@@ -60,10 +60,35 @@ export interface TechnologyArticle {
 
 export const TECHNOLOGY_DATA = {
   hero: {
-    eyebrow: 'OUR TECHNOLOGY',
-    title: 'The Science of Purified Air',
-    description: 'Advanced 5-stage filtration. Intelligent sensing. Cleaner air for a healthier, brighter tomorrow.',
+    eyebrow: 'INSIDE OUR TECHNOLOGY',
+    headline: {
+      from: 'FROM',
+      polluted: 'POLLUTED',
+      to: 'TO',
+      pureAir: 'PURE AIR',
+    },
+    features: [
+      {
+        id: 'captures',
+        line1: 'CAPTURES',
+        line2: 'POLLUTANTS',
+        icon: 'particles',
+      },
+      {
+        id: 'neutralizes',
+        line1: 'NEUTRALIZES',
+        line2: 'HARMFUL PARTICLES',
+        icon: 'shield',
+      },
+      {
+        id: 'releases',
+        line1: 'RELEASES',
+        line2: 'CLEANER AIR',
+        icon: 'wind',
+      },
+    ],
     buttonText: 'Explore Our Technology',
+    watchButtonText: 'Watch How It Works',
     image: '/images/technology/kiyoki-technology-hero.webp',
   },
 
