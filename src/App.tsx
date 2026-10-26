@@ -11,106 +11,33 @@ import { Footer } from './components/Footer';
 import { SearchModal } from './components/SearchModal';
 import { CartDrawer, CartItem } from './components/CartDrawer';
 import { ShopPage } from './components/ShopPage';
-import { AuthModal } from './components/AuthModal';
-import { AdminPortal } from './components/AdminPortal';
-import { UserDashboard } from './components/UserDashboard';
-import { ProductDetailPage } from './components/ProductDetailPage';
 import { TechnologyPage } from './components/TechnologyPage';
-import { getCurrentSession, logout, type AuthSession, addAuditLog } from './services/authService';
-import { PRODUCTS, type Product } from './shopData';
+import { type Product } from './shopData';
 
 export function App() {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isCartOpen, setIsCartOpen] = useState(false);
-  const [isAuthOpen, setIsAuthOpen] = useState(false);
-  const [authInitialMode, setAuthInitialMode] = useState<'login' | 'register'>('login');
-  const [session, setSession] = useState<AuthSession | null>(() => getCurrentSession());
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
 
-  const [selectedProduct, setSelectedProduct] = useState<Product>(() => {
-    const hash = window.location.hash;
-    if (hash.startsWith('#product')) {
-      const parts = hash.split('/');
-      if (parts[1]) {
-        const found = PRODUCTS.find((p) => p.id === parts[1]);
-        if (found) return found;
-      }
-    }
-    return PRODUCTS[0];
-  });
-
-  // Navigation pages: 'home' | 'shop' | 'product' | 'admin' | 'account' | 'technology'
-  const [currentPage, setCurrentPage] = useState<'home' | 'shop' | 'product' | 'admin' | 'account' | 'technology'>(() => {
+  // Active website navigation pages: 'home' | 'shop' | 'technology'
+  const [currentPage, setCurrentPage] = useState<'home' | 'shop' | 'technology'>(() => {
     const hash = window.location.hash;
     const pathname = window.location.pathname;
-    const currentSession = getCurrentSession();
-    if (hash.startsWith('#product')) return 'product';
     if (hash === '#shop' || pathname === '/shop') return 'shop';
     if (hash === '#technology' || pathname === '/technology') return 'technology';
-    if (hash === '#admin') {
-      return currentSession?.user.role === 'admin' ? 'admin' : 'home';
-    }
-    if (hash === '#account') {
-      return currentSession ? 'account' : 'home';
-    }
     return 'home';
   });
 
-  // URL Hash Synchronizer with Role-Based Guards
+  // URL Hash Synchronizer
   useEffect(() => {
     const handleHashChange = () => {
       const hash = window.location.hash;
       const pathname = window.location.pathname;
-      const currentSession = getCurrentSession();
-      setSession(currentSession);
 
-      if (hash.startsWith('#product')) {
-        const parts = hash.split('/');
-        if (parts[1]) {
-          const found = PRODUCTS.find((p) => p.id === parts[1]);
-          if (found) setSelectedProduct(found);
-        }
-        setCurrentPage('product');
-      } else if (hash === '#shop' || pathname === '/shop') {
+      if (hash === '#shop' || pathname === '/shop') {
         setCurrentPage('shop');
       } else if (hash === '#technology' || pathname === '/technology') {
         setCurrentPage('technology');
-      } else if (hash === '#admin') {
-        // Enforce Admin Role Guard
-        if (currentSession && currentSession.user.role === 'admin') {
-          setCurrentPage('admin');
-        } else {
-          // Block unauthorized direct URL access
-          addAuditLog(
-            'UNAUTHORIZED_ACCESS',
-            currentSession ? currentSession.user.email : 'anonymous',
-            'Attempted unauthorized direct URL navigation to #admin portal.'
-          );
-          setAuthInitialMode('login');
-          setIsAuthOpen(true);
-          setCurrentPage('home');
-          window.location.hash = '';
-        }
-      } else if (hash === '#account') {
-        const active = getCurrentSession();
-        if (active) {
-          setSession(active);
-          setCurrentPage('account');
-          setIsAuthOpen(false);
-        } else {
-          setAuthInitialMode('login');
-          setIsAuthOpen(true);
-          setCurrentPage('home');
-          window.location.hash = '';
-        }
-      } else if (hash === '#login') {
-        setAuthInitialMode('login');
-        setIsAuthOpen(true);
-        setCurrentPage('home');
-      } else if (hash === '#register') {
-        setAuthInitialMode('register');
-        setIsAuthOpen(true);
-        setCurrentPage('home');
       } else {
         setCurrentPage('home');
       }
@@ -120,30 +47,8 @@ export function App() {
     return () => window.removeEventListener('hashchange', handleHashChange);
   }, []);
 
-  const handleNavigate = (page: 'home' | 'shop' | 'product' | 'admin' | 'account' | 'technology') => {
-    if (page === 'admin') {
-      const currentSession = getCurrentSession();
-      if (!currentSession || currentSession.user.role !== 'admin') {
-        setAuthInitialMode('login');
-        setIsAuthOpen(true);
-        return;
-      }
-      setIsAuthOpen(false);
-      setCurrentPage('admin');
-      window.location.hash = '#admin';
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    } else if (page === 'account') {
-      const currentSession = getCurrentSession();
-      if (!currentSession) {
-        setAuthInitialMode('login');
-        setIsAuthOpen(true);
-        return;
-      }
-      setIsAuthOpen(false);
-      setCurrentPage('account');
-      window.location.hash = '#account';
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    } else if (page === 'shop') {
+  const handleNavigate = (page: 'home' | 'shop' | 'technology') => {
+    if (page === 'shop') {
       setCurrentPage('shop');
       window.location.hash = '#shop';
       window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -151,43 +56,11 @@ export function App() {
       setCurrentPage('technology');
       window.location.hash = '#technology';
       window.scrollTo({ top: 0, behavior: 'smooth' });
-    } else if (page === 'product') {
-      setCurrentPage('product');
-      window.location.hash = `#product/${selectedProduct.id}`;
-      window.scrollTo({ top: 0, behavior: 'smooth' });
     } else {
       setCurrentPage('home');
       window.location.hash = '';
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
-  };
-
-  const handleOpenProduct = (product: Product) => {
-    setSelectedProduct(product);
-    setCurrentPage('product');
-    window.location.hash = `#product/${product.id}`;
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-
-  const handleAuthSuccess = (newSession: AuthSession) => {
-    setSession(newSession);
-    setIsAuthOpen(false);
-    // Automatic Role-Based Redirection:
-    // If admin enters credentials -> automatically open the Admin Panel!
-    // If user enters credentials -> open the User Dashboard!
-    if (newSession.user.role === 'admin') {
-      setCurrentPage('admin');
-      window.location.hash = '#admin';
-    } else {
-      setCurrentPage('account');
-      window.location.hash = '#account';
-    }
-  };
-
-  const handleLogout = () => {
-    logout();
-    setSession(null);
-    handleNavigate('home');
   };
 
   const handleShopClick = () => {
@@ -248,45 +121,13 @@ export function App() {
       <Header
         onOpenSearch={() => setIsSearchOpen(true)}
         onOpenCart={() => setIsCartOpen(true)}
-        onOpenAuth={() => {
-          setAuthInitialMode('login');
-          setIsAuthOpen(true);
-        }}
         cartCount={cartItems.reduce((acc, item) => acc + item.quantity, 0)}
         currentPage={currentPage}
         onNavigate={handleNavigate}
-        session={session}
-        onLogout={handleLogout}
       />
 
-      {/* CONDITIONAL CONTENT: ADMIN PORTAL, USER DASHBOARD, PRODUCT DETAIL PAGE, SHOP PAGE OR HOME PAGE */}
-      {currentPage === 'admin' ? (
-        <main className="w-full">
-          <AdminPortal
-            session={session}
-            onLogout={handleLogout}
-            onNavigateHome={() => handleNavigate('home')}
-          />
-        </main>
-      ) : currentPage === 'account' ? (
-        <main className="w-full">
-          <UserDashboard
-            session={session}
-            onLogout={handleLogout}
-            onNavigateHome={() => handleNavigate('home')}
-            onNavigateShop={() => handleNavigate('shop')}
-          />
-        </main>
-      ) : currentPage === 'product' && selectedProduct ? (
-        <main className="w-full">
-          <ProductDetailPage
-            product={selectedProduct}
-            onAddToCart={handleAddProductToCart}
-            onNavigateShop={() => handleNavigate('shop')}
-            onSelectProduct={handleOpenProduct}
-          />
-        </main>
-      ) : currentPage === 'technology' ? (
+      {/* CONDITIONAL MAIN CONTENT: TECHNOLOGY PAGE, SHOP PAGE OR HOME PAGE */}
+      {currentPage === 'technology' ? (
         <main className="w-full">
           <TechnologyPage onNavigate={handleNavigate} />
         </main>
@@ -294,7 +135,6 @@ export function App() {
         <main className="w-full">
           <ShopPage
             onAddToCart={(p) => handleAddProductToCart(p, 1)}
-            onProductOpen={handleOpenProduct}
           />
         </main>
       ) : (
@@ -310,21 +150,9 @@ export function App() {
             onLearnMore={handleLearnMoreClick}
           />
 
-          {/* SECTION 03: Horizontal Product-Card Carousel (Featured 67% + Secondary 33%) */}
+          {/* SECTION 03: Horizontal Product-Card Carousel */}
           <ProductCarousel
-            onShopClick={(productName) => {
-              const matched = PRODUCTS.find(
-                (p) =>
-                  p.model.toLowerCase() === productName.toLowerCase() ||
-                  productName.toLowerCase().includes(p.id) ||
-                  p.model.toLowerCase().includes(productName.toLowerCase())
-              );
-              if (matched) {
-                handleOpenProduct(matched);
-              } else {
-                handleNavigate('shop');
-              }
-            }}
+            onShopClick={() => handleNavigate('shop')}
             onLearnMoreClick={() => handleNavigate('shop')}
           />
 
@@ -335,19 +163,7 @@ export function App() {
 
           {/* SECTION 05: Meet The Green Team (Interactive Expanding Product Showcase) */}
           <GreenTeamSection
-            onShopNowClick={(productName) => {
-              const matched = PRODUCTS.find(
-                (p) =>
-                  p.model.toLowerCase() === productName.toLowerCase() ||
-                  productName.toLowerCase().includes(p.id) ||
-                  p.model.toLowerCase().includes(productName.toLowerCase())
-              );
-              if (matched) {
-                handleOpenProduct(matched);
-              } else {
-                handleNavigate('shop');
-              }
-            }}
+            onShopNowClick={() => handleNavigate('shop')}
           />
 
           {/* SECTION 06: Purify Your Space, Elevate Your Life (Lifestyle & Brand-Story Section) */}
@@ -363,17 +179,11 @@ export function App() {
       )}
 
       {/* GLOBAL FOOTER (Full-Width Solid Black Footer) */}
-      {currentPage !== 'admin' && (
-        <Footer
-          onOpenSearch={() => setIsSearchOpen(true)}
-          onOpenCart={() => setIsCartOpen(true)}
-          onOpenAuth={() => {
-            setAuthInitialMode('login');
-            setIsAuthOpen(true);
-          }}
-          onNavigate={handleNavigate}
-        />
-      )}
+      <Footer
+        onOpenSearch={() => setIsSearchOpen(true)}
+        onOpenCart={() => setIsCartOpen(true)}
+        onNavigate={handleNavigate}
+      />
 
       {/* Quick Search Modal */}
       <SearchModal
@@ -388,14 +198,6 @@ export function App() {
         items={cartItems}
         onRemoveItem={handleRemoveItem}
         onUpdateQuantity={handleUpdateQuantity}
-      />
-
-      {/* Full-Feature Authentication Modal */}
-      <AuthModal
-        isOpen={isAuthOpen}
-        onClose={() => setIsAuthOpen(false)}
-        onAuthSuccess={handleAuthSuccess}
-        initialMode={authInitialMode}
       />
     </div>
   );

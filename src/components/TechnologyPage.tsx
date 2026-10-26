@@ -9,7 +9,7 @@ import { TechnologyBenefits } from './technology/TechnologyBenefits';
 import { TechnologyArticles } from './technology/TechnologyArticles';
 
 interface TechnologyPageProps {
-  onNavigate?: (page: 'home' | 'shop' | 'product' | 'admin' | 'account' | 'technology') => void;
+  onNavigate?: (page: 'home' | 'shop' | 'technology') => void;
 }
 
 export const TechnologyPage: React.FC<TechnologyPageProps> = () => {
