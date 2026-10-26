@@ -56,7 +56,7 @@ export const TechnologyHero: React.FC<TechnologyHeroProps> = ({
       ref={heroRef}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
-      className="relative w-full h-[540px] min-h-[490px] max-h-[620px] lg:h-[560px] overflow-hidden select-none flex items-center bg-[#FFFFFF]"
+      className="relative w-full h-[580px] min-h-[520px] max-h-[660px] lg:h-[620px] overflow-hidden select-none flex items-center bg-[#FFFFFF]"
       style={{ margin: 0, padding: 0 }}
     >
       {/* =========================================================
@@ -74,24 +74,24 @@ export const TechnologyHero: React.FC<TechnologyHeroProps> = ({
         <img
           src={hero.image}
           alt="From Polluted to Pure Air - Kiyoki air purification technology breakdown"
-          className="w-full h-full object-cover object-[72%_center] lg:object-[center_right]"
+          className="w-full h-full object-cover object-[62%_center] lg:object-[60%_center] xl:object-[58%_center]"
           loading="eager"
         />
       </div>
 
       {/* =========================================================
           LAYER 2 — SOFT READABILITY GRADIENT OVERLAY (LEFT SIDE)
-          Ensures high text contrast without obscuring the 3D visual
+          Ensures high text contrast while letting the 3D particles shine
           ========================================================= */}
       <div
         className="absolute inset-0 pointer-events-none"
         style={{
           background:
-            'linear-gradient(90deg, rgba(255,255,255,0.96) 0%, rgba(255,255,255,0.85) 32%, rgba(255,255,255,0.22) 58%, rgba(255,255,255,0) 78%)',
+            'linear-gradient(90deg, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.82) 30%, rgba(255,255,255,0.20) 56%, rgba(255,255,255,0) 76%)',
         }}
       />
 
-      {/* Mobile-specific overlay for legibility on small screens */}
+      {/* Mobile-specific overlay for legibility on small portrait screens */}
       <div
         className="absolute inset-0 pointer-events-none sm:hidden"
         style={{
@@ -105,11 +105,11 @@ export const TechnologyHero: React.FC<TechnologyHeroProps> = ({
           Curved pointer lines & technical labels pinned to visual points
           ========================================================= */}
       <div className="absolute inset-0 pointer-events-none z-15 hidden lg:block overflow-hidden">
-        <div className="relative w-full max-w-[1360px] h-full mx-auto">
+        <div className="relative w-full max-w-[1380px] h-full mx-auto">
           
           {/* CALLOUT 1 — TRAPS ULTRA-FINE PARTICLES */}
           <div
-            className="absolute top-[8%] left-[51%] flex flex-col items-start transition-all duration-700 ease-out"
+            className="absolute top-[8%] left-[51%] xl:left-[50%] flex flex-col items-start transition-all duration-700 ease-out"
             style={{
               opacity: isLoaded ? 1 : 0,
               transform: isLoaded ? 'translateY(0)' : 'translateY(-10px)',
@@ -137,7 +137,7 @@ export const TechnologyHero: React.FC<TechnologyHeroProps> = ({
 
           {/* CALLOUT 2 — NEUTRALIZES HARMFUL PARTICLES */}
           <div
-            className="absolute top-[5%] right-[22%] flex flex-col items-start transition-all duration-700 ease-out"
+            className="absolute top-[6%] right-[22%] xl:right-[23%] flex flex-col items-start transition-all duration-700 ease-out"
             style={{
               opacity: isLoaded ? 1 : 0,
               transform: isLoaded ? 'translateY(0)' : 'translateY(-10px)',
@@ -165,7 +165,7 @@ export const TechnologyHero: React.FC<TechnologyHeroProps> = ({
 
           {/* CALLOUT 3 — RELEASES CLEANER, FRESHER AIR */}
           <div
-            className="absolute bottom-[16%] right-[11%] flex items-center gap-2 transition-all duration-700 ease-out"
+            className="absolute bottom-[18%] right-[11%] xl:right-[12%] flex items-center gap-2 transition-all duration-700 ease-out"
             style={{
               opacity: isLoaded ? 1 : 0,
               transform: isLoaded ? 'translateY(0)' : 'translateY(10px)',
@@ -197,8 +197,8 @@ export const TechnologyHero: React.FC<TechnologyHeroProps> = ({
       {/* =========================================================
           LAYER 4 — EDITORIAL CONTENT CONTAINER (LEFT-ALIGNED)
           ========================================================= */}
-      <div className="relative z-20 w-full max-w-[1360px] mx-auto px-6 sm:px-10 lg:px-14 flex items-center h-full">
-        <div className="w-full max-w-[560px] text-left flex flex-col items-start">
+      <div className="relative z-20 w-full max-w-[1380px] mx-auto px-6 sm:px-10 lg:px-14 flex items-center h-full">
+        <div className="w-full max-w-[620px] text-left flex flex-col items-start">
           
           {/* Eyebrow Label with Right Accent Line */}
           <div
@@ -211,7 +211,7 @@ export const TechnologyHero: React.FC<TechnologyHeroProps> = ({
             <span className="text-[11px] sm:text-[12px] font-medium tracking-[0.24em] text-[#475569] uppercase font-mono">
               {hero.eyebrow}
             </span>
-            <span className="inline-block w-10 sm:w-14 h-[1.5px] bg-[#94A3B8]/70 rounded-full" />
+            <span className="inline-block w-12 sm:w-16 h-[1.5px] bg-[#94A3B8]/70 rounded-full" />
           </div>
 
           {/* Main Headline: FROM POLLUTED TO PURE AIR */}
@@ -224,34 +224,47 @@ export const TechnologyHero: React.FC<TechnologyHeroProps> = ({
             }}
           >
             {/* LINE 1: FROM */}
-            <span className="block text-[22px] sm:text-[28px] lg:text-[34px] font-normal tracking-[0.22em] text-[#1E293B] uppercase mb-0 sm:mb-0.5">
+            <span className="block text-[24px] sm:text-[32px] lg:text-[38px] font-normal tracking-[0.22em] text-[#1E293B] uppercase mb-0 sm:mb-0.5">
               {hero.headline.from}
             </span>
 
-            {/* LINE 2: POLLUTED (Heavy, Textured Carbon Particle Aesthetic) */}
-            <h1
-              className="block text-[46px] sm:text-[62px] lg:text-[76px] font-black tracking-[-0.035em] leading-[0.92] uppercase text-[#0F172A] select-none"
-              style={{
-                backgroundImage: "url('/images/technology/carbon-particle-texture.jpg')",
-                backgroundClip: 'text',
-                WebkitBackgroundClip: 'text',
-                color: 'transparent',
-                WebkitTextFillColor: 'transparent',
-                backgroundColor: '#0F172A',
-              }}
-            >
-              {hero.headline.polluted}
-            </h1>
+            {/* LINE 2: POLLUTED (Heavy, Textured Carbon Particle Aesthetic with Dispersing Debris) */}
+            <div className="relative inline-block">
+              <h1
+                className="block text-[54px] sm:text-[72px] lg:text-[88px] xl:text-[96px] font-black tracking-[-0.035em] leading-[0.88] uppercase text-[#0F172A] select-none"
+                style={{
+                  backgroundImage: "url('/images/technology/carbon-particle-texture.jpg')",
+                  backgroundClip: 'text',
+                  WebkitBackgroundClip: 'text',
+                  color: 'transparent',
+                  WebkitTextFillColor: 'transparent',
+                  backgroundColor: '#0F172A',
+                }}
+              >
+                {hero.headline.polluted}
+              </h1>
+
+              {/* Seamless soot particle spray dispersing out from POLLUTED into the center */}
+              <div
+                className="absolute top-0 -right-20 sm:-right-28 lg:-right-36 w-28 sm:w-40 lg:w-48 h-full pointer-events-none opacity-85 hidden sm:block"
+                style={{
+                  backgroundImage: "url('/images/technology/polluted-dispersion-particles.png')",
+                  backgroundSize: 'contain',
+                  backgroundRepeat: 'no-repeat',
+                  backgroundPosition: 'left center',
+                }}
+              />
+            </div>
 
             {/* LINE 3: TO PURE AIR */}
-            <div className="flex items-baseline gap-2.5 sm:gap-3.5 leading-[0.94] mt-1 sm:mt-1.5">
-              <span className="text-[22px] sm:text-[28px] lg:text-[34px] font-normal tracking-[0.22em] text-[#1E293B] uppercase">
+            <div className="flex items-baseline gap-3 sm:gap-4 leading-[0.90] mt-1 sm:mt-1.5">
+              <span className="text-[24px] sm:text-[32px] lg:text-[38px] font-normal tracking-[0.22em] text-[#1E293B] uppercase">
                 {hero.headline.to}
               </span>
               <span
-                className="text-[46px] sm:text-[62px] lg:text-[76px] font-black tracking-[-0.035em] uppercase select-none text-transparent bg-clip-text bg-gradient-to-r from-[#00C2FF] via-[#0095FF] to-[#0066FF]"
+                className="text-[54px] sm:text-[72px] lg:text-[88px] xl:text-[96px] font-black tracking-[-0.035em] uppercase select-none text-transparent bg-clip-text bg-gradient-to-r from-[#00C2FF] via-[#0095FF] to-[#0066FF]"
                 style={{
-                  filter: 'drop-shadow(0 2px 14px rgba(0, 160, 255, 0.28))',
+                  filter: 'drop-shadow(0 2px 14px rgba(0, 160, 255, 0.32))',
                 }}
               >
                 {hero.headline.pureAir}
@@ -261,7 +274,7 @@ export const TechnologyHero: React.FC<TechnologyHeroProps> = ({
 
           {/* Three Feature Badges Strip (Captures, Neutralizes, Releases) */}
           <div
-            className="flex items-center gap-3 sm:gap-5 py-1 mb-6 sm:mb-8 transition-all duration-600 ease-out"
+            className="flex items-center gap-3.5 sm:gap-6 py-1 mb-6 sm:mb-8 transition-all duration-600 ease-out"
             style={{
               opacity: isLoaded ? 1 : 0,
               transform: isLoaded ? 'translateY(0)' : 'translateY(14px)',
@@ -270,7 +283,7 @@ export const TechnologyHero: React.FC<TechnologyHeroProps> = ({
           >
             {/* Feature 1: Captures Pollutants */}
             <div className="flex items-center gap-2 sm:gap-2.5">
-              {/* Custom particle dispersion dots icon matching reference */}
+              {/* Particle cluster icon matching reference */}
               <div className="w-5 h-5 text-slate-800 shrink-0 flex items-center justify-center">
                 <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4">
                   <circle cx="12" cy="12" r="2.2" />

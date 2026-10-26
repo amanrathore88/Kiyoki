@@ -89,7 +89,7 @@ export const TECHNOLOGY_DATA = {
     ],
     buttonText: 'Explore Our Technology',
     watchButtonText: 'Watch How It Works',
-    image: '/images/technology/kiyoki-technology-hero.webp',
+    image: '/images/technology/hero-polluted-to-pure-air.webp',
   },
 
   sciencePanel: {
