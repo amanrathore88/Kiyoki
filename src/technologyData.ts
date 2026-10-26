@@ -6,6 +6,16 @@ export interface TechnologyStep {
   icon: 'wind' | 'layers' | 'sparkles';
 }
 
+export interface PurificationMomentCard {
+  id: string;
+  badge: string;
+  title: string;
+  description: string;
+  actionText: string;
+  image: string;
+  alt: string;
+}
+
 export interface EditorialTile {
   id: string;
   title?: string;
@@ -61,6 +71,44 @@ export const TECHNOLOGY_DATA = {
     eyebrow: 'THE SCIENCE OF',
     highlight: 'Pure Air',
     paragraph: 'Kiyoki uses advanced filtration and intelligent air monitoring to capture and remove 99.97% of airborne pollutants as small as 0.3 microns — so you can breathe cleaner, healthier air every day, in every space.',
+  },
+
+  purificationMomentsSection: {
+    headline: {
+      line1: 'Purification',
+      line2: 'For Every',
+      line3: 'Moment.',
+    },
+    subtitle: 'From your home to your daily commute — Kiyoki brings cleaner air, designed around your life.',
+    cards: [
+      {
+        id: 'home',
+        badge: '01',
+        title: 'Air Purifier',
+        description: 'Advanced purification for healthier homes and offices.',
+        actionText: 'Learn More',
+        image: '/images/technology/purification-moment-home.webp',
+        alt: 'Kiyoki home air purifier in modern Japandi living space',
+      },
+      {
+        id: 'portable',
+        badge: '02',
+        title: 'Portable Air Purifier',
+        description: 'Clean air, with you wherever you go.',
+        actionText: 'Learn More',
+        image: '/images/technology/purification-moment-portable.webp',
+        alt: 'Kiyoki portable personal air purifier on sunlit stone surface',
+      },
+      {
+        id: 'mask',
+        badge: '03',
+        title: 'Air Purifying Mask',
+        description: 'Protection you can wear every day.',
+        actionText: 'Learn More',
+        image: '/images/technology/purification-moment-mask.webp',
+        alt: 'Kiyoki ergonomic air purifying mask with PM2.5 filters',
+      },
+    ] as PurificationMomentCard[],
   },
 
   stepsSection: {
