@@ -11,31 +11,31 @@ interface ProductCardData {
 
 const PRODUCTS: ProductCardData[] = [
   {
-    id: 'x8',
-    name: 'X8',
-    capacity: 'up to 4,000 sq.ft.',
+    id: 'air-purifier',
+    name: 'Kiyoki Air Purifier',
+    capacity: 'Whole-Home & Living Spaces',
     description:
-      'Perfect for open-concept family spaces, basements, commercial offices, and retail spaces—the X8 is ideal for spaces between 1,000-1,600 sq.ft.',
-    image: '/images/purifier_x8.png',
-    imageAlt: 'Kiyoki X8 Air Purifier for large spaces',
+      'Engineered for comprehensive room coverage with 360-degree intake and multi-layer filtration. Delivers continuous, whisper-quiet air circulation to capture fine dust, pollen, and everyday allergens.',
+    image: '/images/greenteam_home_purifier.png',
+    imageAlt: 'Kiyoki Home Air Purifier with fabric acoustic body',
   },
   {
-    id: 'x3',
-    name: 'X3',
-    capacity: 'up to 869 sq.ft.',
+    id: 'portable-purifier',
+    name: 'Nivo Portable Purifier',
+    capacity: 'Personal Breathing Zone',
     description:
-      'Designed for bedrooms, nurseries, and personal work studios—the X3 delivers whisper-quiet, medical-grade purification for spaces up to 869 sq.ft.',
-    image: '/images/purifier_x3.png',
-    imageAlt: 'Kiyoki X3 Air Purifier for bedrooms',
+      'A compact wearable air purifier designed for mobile everyday defense. Emits continuous negative ions around your personal space wherever you work, commute, or travel.',
+    image: '/images/greenteam_portable_purifier.png',
+    imageAlt: 'Nivo by Kiyoki Wearable Personal Air Purifier',
   },
   {
-    id: 'x5',
-    name: 'X5',
-    capacity: 'up to 1,600 sq.ft.',
+    id: 'air-mask',
+    name: 'Aero Active Mask',
+    capacity: 'Outdoor & Daily Commute',
     description:
-      'Engineered for master suites, living rooms, and open apartments—the X5 offers high-velocity filtration and smart air sensing for spaces up to 1,600 sq.ft.',
-    image: '/images/purifier_x5.png',
-    imageAlt: 'Kiyoki X5 Air Purifier for family rooms',
+      'Ergonomic personal filtration mask engineered for high-density urban environments. Breathable structured mesh and contoured seal provide reliable defense against dust, smoke, and outdoor particulates.',
+    image: '/images/greenteam_air_mask.png',
+    imageAlt: 'Kiyoki Aero Active Personal Air Mask',
   },
 ];
 
@@ -46,8 +46,8 @@ interface GreenTeamSectionProps {
 export const GreenTeamSection: React.FC<GreenTeamSectionProps> = ({
   onShopNowClick,
 }) => {
-  // Initial expanded state is Card 1 (X8) matching the reference design
-  const [expandedId, setExpandedId] = useState<string>('x8');
+  // Initial expanded state is Card 1 (Home Air Purifier)
+  const [expandedId, setExpandedId] = useState<string>('air-purifier');
 
   return (
     <section className="w-full bg-white text-gray-900 pt-7 sm:pt-9 lg:pt-11 pb-14 sm:pb-16 lg:pb-20 px-4 sm:px-6 lg:px-8 select-none">
