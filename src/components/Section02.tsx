@@ -166,11 +166,11 @@ export const Section02: React.FC<Section02Props> = ({
           onMouseLeave={() => setIsHovered(false)}
           className="w-full md:w-[57%] h-72 sm:h-96 md:h-full relative overflow-hidden bg-black shrink-0 select-none cursor-pointer"
         >
-          {/* Real HTML5 Video using user-provided MP4 */}
+          {/* Real HTML5 Video using user-provided MP4 (1026.mp4) */}
           <video
             ref={videoRef}
-            src="/videos/kiyoki-breathe-well.mp4"
-            poster="/images/sec2_video_living.png"
+            src="/videos/1026.mp4"
+            poster="/images/sec2_video_poster_1026.jpg"
             autoPlay
             loop
             muted
@@ -220,7 +220,7 @@ export const Section02: React.FC<Section02Props> = ({
                 </button>
 
                 <span className="font-mono text-white/90 text-xs sm:text-[13px]">
-                  {formatTime(currentTime)} / {formatTime(duration || 52)}
+                  {formatTime(currentTime)} / {formatTime(duration || 12)}
                 </span>
               </div>
 
