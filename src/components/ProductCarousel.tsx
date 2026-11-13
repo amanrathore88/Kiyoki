@@ -3,7 +3,6 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface FeatureItem {
   id: string;
-  badge: string;
   title: string;
   tagline: string;
   description: string;
@@ -18,7 +17,6 @@ interface ProductCarouselProps {
 const baseFeatures: FeatureItem[] = [
   {
     id: 'smart-app-control',
-    badge: 'Smart Connectivity',
     title: 'Smart App Control',
     tagline: 'Control your air. Anytime, anywhere.',
     description:
@@ -27,7 +25,6 @@ const baseFeatures: FeatureItem[] = [
   },
   {
     id: 'filter-replacement-indicator',
-    badge: 'Easy Maintenance',
     title: 'Filter Replacement Indicator',
     tagline: 'Know when your filter needs a change.',
     description:
@@ -36,7 +33,6 @@ const baseFeatures: FeatureItem[] = [
   },
   {
     id: 'night-mode-low-noise',
-    badge: 'Sleep Wellness',
     title: 'Night Mode & Low Noise',
     tagline: 'Quiet comfort. Even while you sleep.',
     description:
@@ -45,7 +41,6 @@ const baseFeatures: FeatureItem[] = [
   },
   {
     id: 'real-time-air-monitoring',
-    badge: 'Air Telemetry',
     title: 'Real-Time Air Quality Monitoring',
     tagline: 'See the air you breathe.',
     description:
@@ -369,8 +364,7 @@ export const ProductCarousel: React.FC<ProductCarouselProps> = ({
                       : 'group-hover/card:opacity-0 group-hover/card:translate-y-3'
                   }`}
                 >
-                  <div className="px-4 py-2 rounded-full bg-black/55 backdrop-blur-md text-white border border-white/20 flex items-center gap-2.5 shadow-lg">
-                    <span className="w-2 h-2 rounded-full bg-sky-400 animate-pulse" />
+                  <div className="px-4 py-2 rounded-full bg-black/55 backdrop-blur-md text-white border border-white/20 flex items-center gap-2 shadow-lg">
                     <span className="text-xs sm:text-sm font-semibold tracking-wide">
                       {item.title}
                     </span>
@@ -386,13 +380,6 @@ export const ProductCarousel: React.FC<ProductCarouselProps> = ({
                       : 'translate-y-full opacity-0 group-hover/card:translate-y-0 group-hover/card:opacity-100 pointer-events-none group-hover/card:pointer-events-auto'
                   }`}
                 >
-                  {/* Category Badge */}
-                  <div className="mb-2 sm:mb-2.5">
-                    <span className="inline-block text-[11px] sm:text-[12px] font-mono tracking-widest uppercase text-sky-400 font-semibold bg-sky-400/10 px-2.5 py-1 rounded-md border border-sky-400/20 backdrop-blur-xs">
-                      {item.badge}
-                    </span>
-                  </div>
-
                   {/* Feature Title */}
                   <h3 className="text-2xl sm:text-3xl lg:text-[34px] font-extrabold text-white tracking-tight leading-tight drop-shadow-sm">
                     {item.title}
