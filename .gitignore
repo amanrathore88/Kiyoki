@@ -36,3 +36,7 @@ lerna-debug.log*
 *.png.bak
 *.jpg.bak
 *.log
+scratch/
+*.zip
+Kiyoki_Antigravity_Handoff/
+/*.png

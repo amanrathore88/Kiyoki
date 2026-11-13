@@ -1,0 +1,16 @@
+/* Scoped Responsive Refinements for Technology Page */
+
+@media (max-width: 1023px) {
+  .ky-tech-hero-frame {
+    padding: 2.25rem 2rem !important;
+  }
+}
+
+@media (max-width: 767px) {
+  .ky-tech-hero-frame {
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 2rem 1.5rem !important;
+    min-height: 360px !important;
+  }
+}

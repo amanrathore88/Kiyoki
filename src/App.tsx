@@ -11,7 +11,8 @@ import { Footer } from './components/Footer';
 import { SearchModal } from './components/SearchModal';
 import { CartDrawer, CartItem } from './components/CartDrawer';
 import { ShopPage } from './components/ShopPage';
-import { TechnologyPage } from './components/TechnologyPage';
+import { TechnologyPage } from './technology/TechnologyPage';
+import { AboutPage } from './components/AboutPage';
 import { type Product } from './shopData';
 
 export function App() {
@@ -19,12 +20,13 @@ export function App() {
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
 
-  // Active website navigation pages: 'home' | 'shop' | 'technology'
-  const [currentPage, setCurrentPage] = useState<'home' | 'shop' | 'technology'>(() => {
+  // Active website navigation pages: 'home' | 'shop' | 'technology' | 'about'
+  const [currentPage, setCurrentPage] = useState<'home' | 'shop' | 'technology' | 'about'>(() => {
     const hash = window.location.hash;
     const pathname = window.location.pathname;
     if (hash === '#shop' || pathname === '/shop') return 'shop';
     if (hash === '#technology' || pathname === '/technology') return 'technology';
+    if (hash === '#about' || pathname === '/about') return 'about';
     return 'home';
   });
 
@@ -38,6 +40,8 @@ export function App() {
         setCurrentPage('shop');
       } else if (hash === '#technology' || pathname === '/technology') {
         setCurrentPage('technology');
+      } else if (hash === '#about' || pathname === '/about') {
+        setCurrentPage('about');
       } else {
         setCurrentPage('home');
       }
@@ -47,7 +51,7 @@ export function App() {
     return () => window.removeEventListener('hashchange', handleHashChange);
   }, []);
 
-  const handleNavigate = (page: 'home' | 'shop' | 'technology') => {
+  const handleNavigate = (page: 'home' | 'shop' | 'technology' | 'about') => {
     if (page === 'shop') {
       setCurrentPage('shop');
       window.location.hash = '#shop';
@@ -55,6 +59,10 @@ export function App() {
     } else if (page === 'technology') {
       setCurrentPage('technology');
       window.location.hash = '#technology';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else if (page === 'about') {
+      setCurrentPage('about');
+      window.location.hash = '#about';
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } else {
       setCurrentPage('home');
@@ -126,10 +134,23 @@ export function App() {
         onNavigate={handleNavigate}
       />
 
-      {/* CONDITIONAL MAIN CONTENT: TECHNOLOGY PAGE, SHOP PAGE OR HOME PAGE */}
-      {currentPage === 'technology' ? (
+      {/* CONDITIONAL MAIN CONTENT: ABOUT PAGE, TECHNOLOGY PAGE, SHOP PAGE OR HOME PAGE */}
+      {currentPage === 'about' ? (
         <main className="w-full">
-          <TechnologyPage onNavigate={handleNavigate} />
+          <AboutPage
+            onNavigate={handleNavigate}
+            onOpenSearch={() => setIsSearchOpen(true)}
+            onOpenCart={() => setIsCartOpen(true)}
+          />
+        </main>
+      ) : currentPage === 'technology' ? (
+        <main className="w-full">
+          <TechnologyPage
+            onNavigate={handleNavigate}
+            onOpenSearch={() => setIsSearchOpen(true)}
+            onOpenCart={() => setIsCartOpen(true)}
+            cartCount={cartItems.reduce((acc, item) => acc + item.quantity, 0)}
+          />
         </main>
       ) : currentPage === 'shop' ? (
         <main className="w-full">

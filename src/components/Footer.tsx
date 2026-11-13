@@ -4,7 +4,7 @@ import { KiyokiLogo } from './KiyokiLogo';
 interface FooterProps {
   onOpenSearch?: () => void;
   onOpenCart?: () => void;
-  onNavigate?: (page: 'home' | 'shop' | 'technology') => void;
+  onNavigate?: (page: 'home' | 'shop' | 'technology' | 'about') => void;
 }
 
 export const Footer: React.FC<FooterProps> = ({
@@ -48,6 +48,13 @@ export const Footer: React.FC<FooterProps> = ({
     if (label === 'Technology' || label === 'Air Quality') {
       if (onNavigate) {
         onNavigate('technology');
+        return;
+      }
+    }
+
+    if (label === 'About Us' || label === 'About') {
+      if (onNavigate) {
+        onNavigate('about');
         return;
       }
     }

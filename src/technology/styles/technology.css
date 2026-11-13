@@ -1,0 +1,53 @@
+/* Scoped Technology Page Styles */
+
+/* Section 02 Hero Text Frame */
+.ky-tech-hero-frame {
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  border-radius: 0;
+  background-color: transparent;
+}
+
+/* Section 03 Strip Ribbon */
+.ky-tech-strip-bg {
+  background-color: #E5DEC9;
+}
+
+/* Section 07 Breathe Easy Box Container */
+.ky-tech-breathe-box {
+  border-top: 1px solid #717680;
+  border-left: 1px solid #717680;
+  border-right: 1px solid #717680;
+  border-bottom: none !important;
+  border-radius: 0;
+  background-color: #FFFFFF;
+}
+
+/* Section 09 Article Card */
+.ky-tech-article-card {
+  border: 1px solid rgba(229, 231, 235, 0.85);
+  border-radius: 16px;
+  background-color: #FFFFFF;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.ky-tech-article-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.07);
+}
+
+/* Subtle image load fade-in */
+.ky-tech-fade-in {
+  animation: kyTechFadeIn 0.5s ease-out forwards;
+}
+
+@keyframes kyTechFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
