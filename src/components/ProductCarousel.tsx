@@ -1,10 +1,11 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
-interface ProductItem {
+interface FeatureItem {
   id: string;
-  name: string;
-  roomTag: string;
+  badge: string;
+  title: string;
+  tagline: string;
   description: string;
   image: string;
 }
@@ -14,45 +15,53 @@ interface ProductCarouselProps {
   onLearnMoreClick?: (productName: string) => void;
 }
 
-const baseProducts: ProductItem[] = [
+const baseFeatures: FeatureItem[] = [
   {
-    id: 'kiyoki-x8',
-    name: 'Kiyoki X8',
-    roomTag: 'For Large Rooms',
-    description: 'Engineered for open-concept living spaces, high ceilings, and expansive homes.',
+    id: 'smart-app-control',
+    badge: 'Smart Connectivity',
+    title: 'Smart App Control',
+    tagline: 'Control your air. Anytime, anywhere.',
+    description:
+      'Highlight remote operation and convenient control through the app. Monitor indoor air quality in real time, set customized purification schedules, and control settings wherever you are.',
     image: '/images/product_x8_living.jpg',
   },
   {
-    id: 'kiyoki-x3',
-    name: 'Kiyoki X3',
-    roomTag: 'For Bedrooms',
-    description: 'Whisper-quiet medical filtration tailored for restorative, deep rest.',
-    image: '/images/product_x3_bedroom.jpg',
-  },
-  {
-    id: 'kiyoki-pro',
-    name: 'Kiyoki Pro',
-    roomTag: 'For Executive Offices',
-    description: 'High-throughput air purification built for executive boardrooms.',
+    id: 'filter-replacement-indicator',
+    badge: 'Easy Maintenance',
+    title: 'Filter Replacement Indicator',
+    tagline: 'Know when your filter needs a change.',
+    description:
+      'Focus on easy maintenance and timely filter replacement. Intelligent particulate saturation sensors track filter lifespan and notify you precisely when it is time for a fresh replacement.',
     image: '/images/product_pro_office.jpg',
   },
   {
-    id: 'kiyoki-studio',
-    name: 'Kiyoki Studio',
-    roomTag: 'For Active Studios',
-    description: 'Rapid particulate turnover designed for fitness areas and creative spaces.',
+    id: 'night-mode-low-noise',
+    badge: 'Sleep Wellness',
+    title: 'Night Mode & Low Noise',
+    tagline: 'Quiet comfort. Even while you sleep.',
+    description:
+      'Communicate comfortable nighttime use without unnecessary noise. Operates below 18 dB in silent night mode with dimmed indicators for tranquil, undisturbed sleep.',
+    image: '/images/product_x3_bedroom.jpg',
+  },
+  {
+    id: 'real-time-air-monitoring',
+    badge: 'Air Telemetry',
+    title: 'Real-Time Air Quality Monitoring',
+    tagline: 'See the air you breathe.',
+    description:
+      'Show customers the air-quality readings and help them understand when purification may be needed. High-precision laser sensors provide live particulate readings and instant feedback.',
     image: '/images/product_studio_gym.jpg',
   },
 ];
 
-const N = baseProducts.length;
+const N = baseFeatures.length;
 // 5 full buffer sets (20 items) for generous, glitch-free bidirectional runway
-const extendedProducts = [
-  ...baseProducts,
-  ...baseProducts,
-  ...baseProducts,
-  ...baseProducts,
-  ...baseProducts,
+const extendedFeatures = [
+  ...baseFeatures,
+  ...baseFeatures,
+  ...baseFeatures,
+  ...baseFeatures,
+  ...baseFeatures,
 ];
 // Start in the exact center set (Set 2: index 2 * N = 8)
 const INITIAL_INDEX = 2 * N;
@@ -66,6 +75,7 @@ export const ProductCarousel: React.FC<ProductCarouselProps> = ({
   const [dragOffset, setDragOffset] = useState<number>(0);
   const [isDragging, setIsDragging] = useState<boolean>(false);
   const [containerWidth, setContainerWidth] = useState<number>(1200);
+  const [tappedIndex, setTappedIndex] = useState<number | null>(null);
 
   const containerRef = useRef<HTMLDivElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
@@ -318,72 +328,111 @@ export const ProductCarousel: React.FC<ProductCarouselProps> = ({
             gap: `${gap}px`,
           }}
         >
-          {extendedProducts.map((item, idx) => {
+          {extendedFeatures.map((item, idx) => {
             const isActive = idx === virtualIndex;
+            const isRevealed = tappedIndex === idx;
 
             return (
               <div
                 key={`${item.id}-${idx}`}
                 onClick={() => {
-                  if (!isActive) slideTo(idx);
+                  if (!isActive) {
+                    slideTo(idx);
+                  } else {
+                    setTappedIndex((prev) => (prev === idx ? null : idx));
+                  }
                 }}
                 style={{ width: `${cardWidth}px` }}
-                className={`shrink-0 h-[440px] sm:h-[480px] lg:h-[510px] rounded-2xl sm:rounded-3xl overflow-hidden relative shadow-[0_2px_12px_rgba(0,0,0,0.04)] border border-gray-100 transition-opacity duration-300 ${
+                className={`group/card shrink-0 h-[440px] sm:h-[480px] lg:h-[510px] rounded-2xl sm:rounded-3xl overflow-hidden relative shadow-[0_2px_12px_rgba(0,0,0,0.04)] border border-gray-100 transition-all duration-300 ${
                   isActive ? 'cursor-default' : 'cursor-pointer hover:opacity-95'
                 }`}
               >
                 {/* Full-Bleed High-Quality Photorealistic Image */}
                 <img
                   src={item.image}
-                  alt={item.name}
-                  className="w-full h-full object-cover object-center pointer-events-none select-none transition-transform duration-700 ease-out hover:scale-[1.02]"
+                  alt={item.title}
+                  className="w-full h-full object-cover object-center pointer-events-none select-none transition-transform duration-700 ease-out group-hover/card:scale-105"
                 />
 
-                {/* Subtle dark gradient overlay for text readability */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-transparent pointer-events-none" />
+                {/* Dark gradient overlay that deepens smoothly on hover */}
+                <div
+                  className={`absolute inset-0 bg-gradient-to-t from-black/95 via-black/55 to-black/10 transition-opacity duration-500 pointer-events-none ${
+                    isRevealed ? 'opacity-100' : 'opacity-0 group-hover/card:opacity-100'
+                  }`}
+                />
 
-                {/* Top-Left Category Tag */}
-                <div className="absolute top-6 left-6 sm:top-8 sm:left-8 z-10 pointer-events-none">
-                  <span className="text-white/90 text-xs sm:text-sm font-semibold tracking-wide drop-shadow-sm">
-                    {item.roomTag}
-                  </span>
+                {/* Resting State: Minimal Floating Indicator at bottom left (fades out as content slides up) */}
+                <div
+                  className={`absolute bottom-6 left-6 sm:bottom-8 sm:left-8 z-10 transition-all duration-300 pointer-events-none ${
+                    isRevealed
+                      ? 'opacity-0 translate-y-3'
+                      : 'group-hover/card:opacity-0 group-hover/card:translate-y-3'
+                  }`}
+                >
+                  <div className="px-4 py-2 rounded-full bg-black/55 backdrop-blur-md text-white border border-white/20 flex items-center gap-2.5 shadow-lg">
+                    <span className="w-2 h-2 rounded-full bg-sky-400 animate-pulse" />
+                    <span className="text-xs sm:text-sm font-semibold tracking-wide">
+                      {item.title}
+                    </span>
+                    <span className="text-white/70 text-xs font-mono ml-0.5">↑</span>
+                  </div>
                 </div>
 
-                {/* Bottom-Left Content: Name, Room Subtitle, CTAs */}
-                <div className="absolute inset-x-0 bottom-0 p-6 sm:p-8 lg:p-10 z-10 flex flex-col justify-end text-white">
-                  {/* Product Name */}
-                  <h3 className="text-3xl sm:text-4xl lg:text-[42px] font-extrabold text-white tracking-tight leading-none drop-shadow-sm">
-                    {item.name}
+                {/* Hover Slide-Up Content Panel: Animates upwards from bottom into view */}
+                <div
+                  className={`absolute inset-x-0 bottom-0 p-6 sm:p-8 lg:p-10 z-20 flex flex-col justify-end text-white transform transition-all duration-500 ease-out ${
+                    isRevealed
+                      ? 'translate-y-0 opacity-100 pointer-events-auto'
+                      : 'translate-y-full opacity-0 group-hover/card:translate-y-0 group-hover/card:opacity-100 pointer-events-none group-hover/card:pointer-events-auto'
+                  }`}
+                >
+                  {/* Category Badge */}
+                  <div className="mb-2 sm:mb-2.5">
+                    <span className="inline-block text-[11px] sm:text-[12px] font-mono tracking-widest uppercase text-sky-400 font-semibold bg-sky-400/10 px-2.5 py-1 rounded-md border border-sky-400/20 backdrop-blur-xs">
+                      {item.badge}
+                    </span>
+                  </div>
+
+                  {/* Feature Title */}
+                  <h3 className="text-2xl sm:text-3xl lg:text-[34px] font-extrabold text-white tracking-tight leading-tight drop-shadow-sm">
+                    {item.title}
                   </h3>
 
-                  {/* Subtitle / Description */}
-                  <p className="mt-2 text-xs sm:text-sm text-white/90 font-medium tracking-wide drop-shadow-xs max-w-md">
+                  {/* Tagline */}
+                  <p className="mt-1.5 sm:mt-2 text-sm sm:text-base lg:text-[17px] font-semibold text-sky-200 tracking-tight">
+                    {item.tagline}
+                  </p>
+
+                  {/* Detailed Description */}
+                  <p className="mt-2 sm:mt-2.5 text-xs sm:text-sm text-neutral-300 font-normal leading-relaxed max-w-xl">
                     {item.description}
                   </p>
 
-                  {/* CTA Buttons */}
+                  {/* Interactive Buttons */}
                   <div className="mt-5 sm:mt-6 flex items-center gap-3 sm:gap-3.5 flex-wrap">
                     <button
                       type="button"
                       onClick={(e) => {
                         e.stopPropagation();
-                        if (onShopClick) onShopClick(item.name);
+                        if (onLearnMoreClick) onLearnMoreClick(item.title);
                       }}
-                      className="px-6 sm:px-7 py-2.5 sm:py-3 bg-[#3168E8] hover:bg-[#2355cc] active:bg-[#1a44a8] text-white text-xs sm:text-sm font-semibold rounded-[6px] shadow-sm hover:shadow transition-all duration-200 cursor-pointer"
+                      className="px-6 sm:px-7 py-2.5 sm:py-3 bg-white hover:bg-neutral-100 active:scale-95 text-[#111827] text-xs sm:text-sm font-semibold rounded-full shadow-lg transition-all duration-200 cursor-pointer flex items-center gap-2"
                     >
-                      Shop Now
+                      <span>Learn More</span>
+                      <span>→</span>
                     </button>
-
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        if (onLearnMoreClick) onLearnMoreClick(item.name);
-                      }}
-                      className="px-6 sm:px-7 py-2.5 sm:py-3 bg-white hover:bg-gray-100 active:bg-gray-200 text-[#111827] text-xs sm:text-sm font-semibold rounded-[6px] shadow-2xs transition-all duration-200 cursor-pointer"
-                    >
-                      Learn More
-                    </button>
+                    {onShopClick && (
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onShopClick(item.title);
+                        }}
+                        className="px-6 sm:px-7 py-2.5 sm:py-3 bg-[#3168E8] hover:bg-[#2355cc] active:scale-95 text-white text-xs sm:text-sm font-semibold rounded-full shadow-md transition-all duration-200 cursor-pointer"
+                      >
+                        Shop Kiyoki
+                      </button>
+                    )}
                   </div>
                 </div>
               </div>
@@ -393,7 +442,7 @@ export const ProductCarousel: React.FC<ProductCarouselProps> = ({
 
         {/* Centered Pagination Indicator Dots */}
         <div className="flex items-center justify-center gap-2.5 mt-7 sm:mt-8">
-          {baseProducts.map((_, idx) => {
+          {baseFeatures.map((_, idx) => {
             const isActive = idx === activeDotIndex;
             return (
               <button
@@ -405,7 +454,7 @@ export const ProductCarousel: React.FC<ProductCarouselProps> = ({
                     ? 'w-2.5 h-2.5 bg-[#111827] scale-110'
                     : 'w-2.5 h-2.5 bg-gray-300 hover:bg-gray-400'
                 }`}
-                aria-label={`Go to product ${idx + 1}`}
+                aria-label={`Go to slide ${idx + 1}`}
               />
             );
           })}
