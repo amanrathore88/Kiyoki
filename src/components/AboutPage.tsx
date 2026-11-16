@@ -181,47 +181,15 @@ export const AboutPage: React.FC<AboutPageProps> = ({
           {/* Two-Column Content Row: Balanced Left Narrative & Right Photography */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 xl:gap-16 items-center">
             
-            {/* Left Column: Substantive Narrative & Empirical Specs */}
-            <div className="lg:col-span-6 xl:col-span-6 flex flex-col justify-center">
-              
-              <p className="text-[17px] sm:text-[18px] lg:text-[19px] text-white font-medium leading-[1.6] mb-4">
+            {/* Left Column: Substantive Editorial Narrative */}
+            <div className="lg:col-span-6 xl:col-span-6 flex flex-col justify-center space-y-4 sm:space-y-5">
+              <p className="text-[17px] sm:text-[18px] lg:text-[19px] text-white font-medium leading-[1.6]">
                 At Kiyoki, we believe that pure indoor air is an engineering science, not a luxury accessory. Our design studio brings together aerosol physics, precision mechanical engineering, and human-centered ergonomics to fundamentally transform how living spaces breathe.
               </p>
               
-              <p className="text-[14px] sm:text-[15px] lg:text-[15.5px] text-white/75 font-normal leading-[1.7] mb-7 sm:mb-8">
+              <p className="text-[14.5px] sm:text-[15.5px] lg:text-[16px] text-white/75 font-normal leading-[1.7]">
                 From custom-calibrated brushless DC motors that run in tranquil silence below 18 dB, to active negative ion matrices verified in independent academic trials, every component is sculpted with deliberate purpose. We engineer seamless, zero-ozone purification that quietly elevates your everyday environment.
               </p>
-
-              {/* Three-Metric Editorial Highlight Row */}
-              <div className="grid grid-cols-3 gap-4 pt-5 border-t border-white/15">
-                <div>
-                  <span className="text-[22px] sm:text-[26px] font-black text-white tracking-tight block leading-tight">
-                    99.97%
-                  </span>
-                  <span className="text-[11px] sm:text-[12px] uppercase tracking-wider text-white/60 font-semibold block mt-0.5">
-                    Sub-Micron Capture
-                  </span>
-                </div>
-
-                <div>
-                  <span className="text-[22px] sm:text-[26px] font-black text-white tracking-tight block leading-tight">
-                    &lt; 18 dB
-                  </span>
-                  <span className="text-[11px] sm:text-[12px] uppercase tracking-wider text-white/60 font-semibold block mt-0.5">
-                    Silent Operation
-                  </span>
-                </div>
-
-                <div>
-                  <span className="text-[22px] sm:text-[26px] font-black text-white tracking-tight block leading-tight">
-                    0.00 ppm
-                  </span>
-                  <span className="text-[11px] sm:text-[12px] uppercase tracking-wider text-white/60 font-semibold block mt-0.5">
-                    Safe Zero Ozone
-                  </span>
-                </div>
-              </div>
-
             </div>
 
             {/* Right Column: High-Resolution Photo of Design Craft */}
