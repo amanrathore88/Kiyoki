@@ -14,17 +14,25 @@ export const AboutPage: React.FC<AboutPageProps> = ({
   onNavigate,
 }) => {
   const [dynamicWordIndex, setDynamicWordIndex] = useState(0);
-  const [isWordFlipping, setIsWordFlipping] = useState(false);
+  const [animationState, setAnimationState] = useState<'visible' | 'exit' | 'enter'>('visible');
 
-  // Dynamic word cycling effect
+  // Ultra-smooth dynamic word cycling effect
   useEffect(() => {
     const timer = setInterval(() => {
-      setIsWordFlipping(true);
+      // 1. Initiate graceful exit: slides up and fades with soft blur
+      setAnimationState('exit');
+
+      // 2. Once exited (320ms), swap word while positioned below
       setTimeout(() => {
         setDynamicWordIndex((prev) => (prev + 1) % DYNAMIC_HERO_WORDS.length);
-        setIsWordFlipping(false);
-      }, 240);
-    }, 2800);
+        setAnimationState('enter');
+
+        // 3. Immediately glide smoothly up into view
+        setTimeout(() => {
+          setAnimationState('visible');
+        }, 30);
+      }, 320);
+    }, 3000);
 
     return () => clearInterval(timer);
   }, []);
@@ -83,9 +91,9 @@ export const AboutPage: React.FC<AboutPageProps> = ({
       {/* =========================================================================
           SECTION 01: HERO SECTION (White Background)
           Polished & Premium Layout:
-          - Centered Main Heading with Periodic Dynamic Word Flipping (Clean -> Pure -> Fresh -> Safe -> Living)
-          - Left: Framed brand narrative with blue accent quote and feature chips
-          - Right: Floating luxury card featuring the 5-finish portable lineup with color indicators
+          - Centered Main Heading with Ultra-Smooth Dynamic Cycling (Clean -> Pure -> Fresh -> Safe -> Living)
+          - Left: Clean, spacious brand narrative matching reference style
+          - Right: Clean rounded pastel card with portable lineup photo
          ========================================================================= */}
       <section
         id="about-hero"
@@ -94,19 +102,17 @@ export const AboutPage: React.FC<AboutPageProps> = ({
       >
         <div className="w-full max-w-[1440px] xl:max-w-[1560px] mx-auto px-6 sm:px-10 lg:px-12 xl:px-14">
           
-          {/* Centered Main Heading with Dynamic Animated Word */}
+          {/* Centered Main Heading with Ultra-Smooth Dynamic Animated Word */}
           <div className="text-center max-w-4xl lg:max-w-5xl mx-auto mb-12 sm:mb-16 lg:mb-20">
-            <p className="text-[11px] sm:text-[12px] font-bold tracking-[0.24em] text-[#3B82F6] uppercase font-sans mb-3 sm:mb-4">
-              THE FREEDOM TO BREATHE
-            </p>
-
             <h1 className="text-[38px] sm:text-[50px] md:text-[60px] lg:text-[66px] xl:text-[72px] font-black tracking-[-0.035em] leading-[1.08] text-[#050505]">
-              <span className="inline-block relative">
+              <span className="inline-block relative overflow-hidden align-baseline">
                 <span
-                  className={`inline-block text-[#3B82F6] transition-all duration-300 ease-out transform ${
-                    isWordFlipping
-                      ? 'opacity-0 -translate-y-4 scale-95 blur-[1px]'
-                      : 'opacity-100 translate-y-0 scale-100 blur-0'
+                  className={`inline-block text-[#3B82F6] will-change-transform ${
+                    animationState === 'visible'
+                      ? 'opacity-100 translate-y-0 filter-none transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]'
+                      : animationState === 'exit'
+                      ? 'opacity-0 -translate-y-[35%] blur-[1.5px] transition-all duration-300 ease-in'
+                      : 'opacity-0 translate-y-[35%] blur-[1.5px] transition-none'
                   }`}
                 >
                   {DYNAMIC_HERO_WORDS[dynamicWordIndex]}
@@ -117,77 +123,29 @@ export const AboutPage: React.FC<AboutPageProps> = ({
             </h1>
           </div>
 
-          {/* Two-Column Grid: Reorganized for a Polished, Premium Aesthetic */}
+          {/* Two-Column Grid: Left Copy & Right Clean Image Card */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 xl:gap-16 items-center">
             
-            {/* Left Column: Authentic Brand Narrative with Accent Quote & Chips */}
-            <div className="lg:col-span-6 xl:col-span-6 flex flex-col justify-center">
+            {/* Left Column: Authentic Brand Narrative */}
+            <div className="lg:col-span-6 xl:col-span-6 flex flex-col justify-center space-y-6 sm:space-y-7">
+              <p className="text-[15.5px] sm:text-[16.5px] lg:text-[17.5px] text-neutral-800 leading-[1.76] font-normal">
+                We’re Kiyoki, an advanced air-wellness brand built around one stubborn belief: clean, breathable air should be available to everyone, everywhere. Not just inside an air-conditioned room with a bulky purifier humming in the corner, but out in the world where we actually live our lives.
+              </p>
               
-              {/* Highlight Quote Block */}
-              <div className="border-l-[3px] border-[#3B82F6] pl-5 sm:pl-6 mb-6">
-                <p className="text-[17px] sm:text-[18px] lg:text-[19px] text-[#050505] font-semibold leading-[1.6]">
-                  We’re Kiyoki, an advanced air-wellness brand built around one stubborn belief: clean, breathable air should belong to everyone, everywhere.
-                </p>
-              </div>
-
-              {/* Secondary Narrative */}
-              <div className="space-y-4 text-neutral-600 text-[14.5px] sm:text-[15.5px] leading-[1.72] font-normal">
-                <p>
-                  Not just inside an air-conditioned room with a bulky purifier humming in the corner, but out in the world where we actually live our lives.
-                </p>
-                <p>
-                  So we engineered personal air purification you can carry with you—to your morning walk, your daily commute, your crowded office, and your family travels. Grounded in aerosol physics and verified by IIT Kanpur, we don’t think the air you breathe should ever depend on where you happen to be standing.
-                </p>
-              </div>
-
-              {/* Three Subtle Feature Chips */}
-              <div className="flex flex-wrap items-center gap-2.5 pt-6 mt-6 border-t border-neutral-100">
-                <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-blue-50/80 border border-blue-100 text-[#1D4ED8] text-xs font-semibold">
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#3B82F6]" />
-                  Pocket-Sized Portability
-                </span>
-                <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-neutral-100 border border-neutral-200 text-neutral-700 text-xs font-semibold">
-                  Active Ionization Science
-                </span>
-                <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-neutral-100 border border-neutral-200 text-neutral-700 text-xs font-semibold">
-                  IIT Kanpur Validated
-                </span>
-              </div>
-
+              <p className="text-[15.5px] sm:text-[16.5px] lg:text-[17.5px] text-neutral-800 leading-[1.76] font-normal">
+                So we engineered air purification you can carry with you—to your commute, your office, your morning walk, and your everyday travels. Grounded in aerosol physics and verified by IIT Kanpur, we don’t think the air you breathe should ever depend on where you happen to be standing.
+              </p>
             </div>
 
-            {/* Right Column: Elevated Luxury Card with Pastel Lineup */}
+            {/* Right Column: Clean Rounded Card matching Reference */}
             <div className="lg:col-span-6 xl:col-span-6 flex justify-center lg:justify-end">
-              <div className="w-full max-w-[580px] xl:max-w-[620px] rounded-3xl lg:rounded-[36px] overflow-hidden bg-gradient-to-b from-[#E2EDFB] to-[#D0E4FA] p-3 sm:p-4 shadow-xl shadow-blue-500/10 border border-blue-100 group">
-                
-                {/* Inner Image Container */}
-                <div className="relative w-full aspect-[1.34/1] rounded-2xl sm:rounded-[28px] overflow-hidden bg-[#BFDBFE]">
-                  <img
-                    src="/images/about/about-hero-portable-lineup.jpg"
-                    alt="Lineup of sleek Kiyoki portable personal air purifiers in modern pastel finishes"
-                    className="w-full h-full object-cover object-center transition-transform duration-700 ease-out group-hover:scale-103"
-                    loading="eager"
-                  />
-                  {/* Discrete Floating Tag */}
-                  <div className="absolute top-3.5 left-3.5 sm:top-4 sm:left-4 bg-white/90 backdrop-blur-md px-3.5 py-1 rounded-full shadow-xs border border-white/70">
-                    <span className="text-[11px] sm:text-xs font-bold text-neutral-800 tracking-wider uppercase">
-                      Nivo Portable Series
-                    </span>
-                  </div>
-                </div>
-
-                {/* Bottom Card Bar: 5 Color Finishes */}
-                <div className="flex items-center justify-between px-3 pt-3.5 pb-1">
-                  <span className="text-xs text-neutral-600 font-medium">5 Signature Finishes</span>
-                  <div className="flex items-center gap-1.5" title="Available in Blush Pink, Lavender, Obsidian, Sky Blue, and Matte White">
-                    <span className="w-3.5 h-3.5 rounded-full bg-[#E8B8B8] border border-black/10 shadow-2xs" />
-                    <span className="w-3.5 h-3.5 rounded-full bg-[#B8B2E0] border border-black/10 shadow-2xs" />
-                    <span className="w-3.5 h-3.5 rounded-full bg-[#1C1C1E] border border-black/10 shadow-2xs" />
-                    <span className="w-3.5 h-3.5 rounded-full bg-[#9AC8F0] border border-black/10 shadow-2xs" />
-                    <span className="w-3.5 h-3.5 rounded-full bg-[#F5F5F7] border border-black/10 shadow-2xs" />
-                  </div>
-                </div>
-
+              <div className="w-full max-w-[580px] xl:max-w-[620px] aspect-[1.34/1] rounded-2xl sm:rounded-3xl lg:rounded-[32px] overflow-hidden bg-[#BFDBFE] shadow-lg border border-neutral-100/80">
+                <img
+                  src="/images/about/about-hero-portable-lineup.jpg"
+                  alt="Lineup of sleek Kiyoki portable personal air purifiers in modern pastel finishes"
+                  className="w-full h-full object-cover object-center"
+                  loading="eager"
+                />
               </div>
             </div>
 
