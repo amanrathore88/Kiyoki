@@ -127,40 +127,77 @@ export const AboutPage: React.FC<AboutPageProps> = ({
 
       {/* =========================================================================
           SECTION 02: STATEMENT / MISSION BANNER (Pitch Black Background)
-          Matching Reference Slice 2:
+          Refined Editorial Layout:
           - Background: Solid Black (#000000)
-          - Top Header: Serif font with a thin white/gray horizontal rule extending across
-          - Left: Body paragraph in clean sans-serif
-          - Right: High-resolution image of focused hands working at a design desk
+          - Top Header: Serif font with a crisp white dividing line
+          - Left: In-depth narrative on engineering philosophy + 3 key performance metrics
+          - Right: High-resolution photo of focused hands at the design desk
+          - Perfectly balanced vertical heights between left copy and right image
          ========================================================================= */}
       <section
         id="about-mission"
         aria-label="Kiyoki Mission and Science"
-        className="w-full bg-black text-white pt-12 sm:pt-16 lg:pt-20 pb-16 sm:pb-24 lg:pb-32"
+        className="w-full bg-black text-white pt-12 sm:pt-16 lg:pt-20 pb-16 sm:pb-22 lg:pb-28"
       >
         <div className="w-full max-w-[1440px] xl:max-w-[1560px] mx-auto px-6 sm:px-10 lg:px-12 xl:px-14">
           
-          {/* Top Serif Heading - High Visibility & Perfect Proportion */}
+          {/* Top Serif Heading */}
           <h2 className="font-serif text-[34px] sm:text-[46px] md:text-[54px] lg:text-[60px] xl:text-[66px] font-normal text-white tracking-tight leading-snug">
             Professional engineering for pure living
           </h2>
 
           {/* Crisp, High-Visibility Solid White Dividing Line */}
-          <div className="w-full h-[1.5px] bg-white mt-4 sm:mt-5 mb-14 sm:mb-20 lg:mb-28" />
+          <div className="w-full h-[1.5px] bg-white mt-4 sm:mt-5 mb-8 sm:mb-10 lg:mb-12" />
 
-          {/* Two-Column Content Row: Generous Open Black Space, Narrow 5-Line Paragraph, Sharp Photo */}
-          <div className="flex flex-col lg:flex-row items-start justify-between gap-10 lg:gap-16">
+          {/* Two-Column Content Row: Balanced Left Narrative & Right Photography */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 xl:gap-16 items-center">
             
-            {/* Left Column: Focused 5-Line Editorial Paragraph */}
-            <div className="w-full lg:max-w-[320px] xl:max-w-[340px]">
-              <p className="text-[15px] sm:text-[16px] lg:text-[17px] text-white/90 font-normal leading-[1.65]">
-                Our mission combines expert engineering, practical science, and actionable filtration for immediate living space impact.
+            {/* Left Column: Substantive Narrative & Empirical Specs */}
+            <div className="lg:col-span-6 xl:col-span-6 flex flex-col justify-center">
+              
+              <p className="text-[17px] sm:text-[18px] lg:text-[19px] text-white font-medium leading-[1.6] mb-4">
+                At Kiyoki, we believe that pure indoor air is an engineering science, not a luxury accessory. Our design studio brings together aerosol physics, precision mechanical engineering, and human-centered ergonomics to fundamentally transform how living spaces breathe.
               </p>
+              
+              <p className="text-[14px] sm:text-[15px] lg:text-[15.5px] text-white/75 font-normal leading-[1.7] mb-7 sm:mb-8">
+                From custom-calibrated brushless DC motors that run in tranquil silence below 18 dB, to active negative ion matrices verified in independent academic trials, every component is sculpted with deliberate purpose. We engineer seamless, zero-ozone purification that quietly elevates your everyday environment.
+              </p>
+
+              {/* Three-Metric Editorial Highlight Row */}
+              <div className="grid grid-cols-3 gap-4 pt-5 border-t border-white/15">
+                <div>
+                  <span className="text-[22px] sm:text-[26px] font-black text-white tracking-tight block leading-tight">
+                    99.97%
+                  </span>
+                  <span className="text-[11px] sm:text-[12px] uppercase tracking-wider text-white/60 font-semibold block mt-0.5">
+                    Sub-Micron Capture
+                  </span>
+                </div>
+
+                <div>
+                  <span className="text-[22px] sm:text-[26px] font-black text-white tracking-tight block leading-tight">
+                    &lt; 18 dB
+                  </span>
+                  <span className="text-[11px] sm:text-[12px] uppercase tracking-wider text-white/60 font-semibold block mt-0.5">
+                    Silent Operation
+                  </span>
+                </div>
+
+                <div>
+                  <span className="text-[22px] sm:text-[26px] font-black text-white tracking-tight block leading-tight">
+                    0.00 ppm
+                  </span>
+                  <span className="text-[11px] sm:text-[12px] uppercase tracking-wider text-white/60 font-semibold block mt-0.5">
+                    Safe Zero Ozone
+                  </span>
+                </div>
+              </div>
+
             </div>
 
-            {/* Right Column: Exact Sharp-Cornered Photo from Reference Image 2 */}
-            <div className="w-full max-w-[500px] sm:max-w-[540px] lg:max-w-[580px] xl:max-w-[620px]">
-              <div className="w-full aspect-[1.84/1] rounded-none overflow-hidden bg-neutral-900 border border-white/10 shadow-none">
+            {/* Right Column: High-Resolution Photo of Design Craft */}
+            <div className="lg:col-span-6 xl:col-span-6 flex justify-center lg:justify-end">
+              <div className="w-full max-w-[580px] xl:max-w-[620px] aspect-[1.7/1] rounded-xl sm:rounded-2xl overflow-hidden bg-neutral-900 border border-white/10 shadow-2xl">
                 <img
                   src="/images/about/about-craft-desk-exact-2x.png"
                   alt="Hands typing on laptop with coffee mug and notebook on wooden desk"
