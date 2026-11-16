@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { ChevronDown } from 'lucide-react';
+import { AboutEnvironmentalSection } from './AboutEnvironmentalSection';
 
 interface AboutPageProps {
   onNavigate?: (page: 'home' | 'shop' | 'technology' | 'about') => void;
@@ -175,140 +176,14 @@ export const AboutPage: React.FC<AboutPageProps> = ({
       </section>
 
       {/* =========================================================================
-          SECTION 03: REGISTRATION PACKAGES (White Background)
-          Exact Match to Reference Image 2:
-          - Top solid black horizontal rule across
-          - Serif Heading "Choose your registration package"
-          - Bottom solid black horizontal rule across
-          - 3 Sharp-cornered cards in #E4E4E4 gray with Standard, Professional, Premium passes
-          - Prices $99, $149, $199 at bottom-left without dividing lines
+          SECTION 03: ENVIRONMENTAL & CLIMATE COMMITMENT (Interactive 3-Element Showcase)
+          Exact Match to Reference Mockup:
+          - Centered Section Header: "Environmental & Climate Action"
+          - Cycle Navigation Controls with < > round buttons and index pill
+          - 3-Element Stage: Left Context Image + Center Content Card + Right Action Image
+          - Accompanying images update synchronously as user cycles through slides
          ========================================================================= */}
-      <section
-        id="about-pillars"
-        aria-label="Registration Packages"
-        className="w-full bg-white pt-10 sm:pt-14 lg:pt-18 pb-16 sm:pb-24 lg:pb-32"
-      >
-        <div className="w-full max-w-[1440px] xl:max-w-[1560px] mx-auto px-6 sm:px-10 lg:px-12 xl:px-14">
-          
-          {/* Top Horizontal Black Line */}
-          <div className="w-full h-px sm:h-[1.5px] bg-black" />
-
-          {/* Heading between the two solid black lines */}
-          <div className="py-7 sm:py-9 lg:py-11">
-            <h2 className="font-serif text-[34px] sm:text-[46px] md:text-[54px] lg:text-[60px] xl:text-[64px] font-normal text-[#050505] tracking-tight leading-none">
-              Choose your registration package
-            </h2>
-          </div>
-
-          {/* Bottom Horizontal Black Line */}
-          <div className="w-full h-px sm:h-[1.5px] bg-black" />
-
-          {/* 3-Card Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-5 lg:gap-5 mt-12 sm:mt-16 lg:mt-20">
-            
-            {/* Card 1: Standard pass */}
-            <div className="bg-[#E4E4E4] rounded-none p-7 sm:p-8 lg:p-9 xl:p-10 flex flex-col justify-between min-h-[350px] sm:min-h-[380px] lg:min-h-[420px]">
-              <div>
-                <h3 className="font-serif text-[24px] sm:text-[27px] lg:text-[29px] font-normal text-[#050505] mb-5 sm:mb-6">
-                  Standard pass
-                </h3>
-                <ul className="space-y-2.5 sm:space-y-3 text-[13.5px] sm:text-[14.5px] text-[#111111] font-normal leading-relaxed">
-                  <li className="flex items-start gap-2.5">
-                    <span className="text-[#050505] text-[15px] leading-snug">•</span>
-                    <span>Full training access</span>
-                  </li>
-                  <li className="flex items-start gap-2.5">
-                    <span className="text-[#050505] text-[15px] leading-snug">•</span>
-                    <span>Digital materials</span>
-                  </li>
-                  <li className="flex items-start gap-2.5">
-                    <span className="text-[#050505] text-[15px] leading-snug">•</span>
-                    <span>Certificate of completion</span>
-                  </li>
-                </ul>
-              </div>
-
-              <div className="pt-8 sm:pt-10">
-                <span className="text-[32px] sm:text-[36px] lg:text-[40px] font-black text-[#050505] tracking-tight block leading-none">
-                  $99
-                </span>
-              </div>
-            </div>
-
-            {/* Card 2: Professional pass */}
-            <div className="bg-[#E4E4E4] rounded-none p-7 sm:p-8 lg:p-9 xl:p-10 flex flex-col justify-between min-h-[350px] sm:min-h-[380px] lg:min-h-[420px]">
-              <div>
-                <h3 className="font-serif text-[24px] sm:text-[27px] lg:text-[29px] font-normal text-[#050505] mb-5 sm:mb-6">
-                  Professional pass
-                </h3>
-                <ul className="space-y-2.5 sm:space-y-3 text-[13.5px] sm:text-[14.5px] text-[#111111] font-normal leading-relaxed">
-                  <li className="flex items-start gap-2.5">
-                    <span className="text-[#050505] text-[15px] leading-snug">•</span>
-                    <span>Full training access</span>
-                  </li>
-                  <li className="flex items-start gap-2.5">
-                    <span className="text-[#050505] text-[15px] leading-snug">•</span>
-                    <span>Digital materials</span>
-                  </li>
-                  <li className="flex items-start gap-2.5">
-                    <span className="text-[#050505] text-[15px] leading-snug">•</span>
-                    <span>Certificate of completion</span>
-                  </li>
-                  <li className="flex items-start gap-2.5">
-                    <span className="text-[#050505] text-[15px] leading-snug">•</span>
-                    <span>Bonus resources</span>
-                  </li>
-                </ul>
-              </div>
-
-              <div className="pt-8 sm:pt-10">
-                <span className="text-[32px] sm:text-[36px] lg:text-[40px] font-black text-[#050505] tracking-tight block leading-none">
-                  $149
-                </span>
-              </div>
-            </div>
-
-            {/* Card 3: Premium pass */}
-            <div className="bg-[#E4E4E4] rounded-none p-7 sm:p-8 lg:p-9 xl:p-10 flex flex-col justify-between min-h-[350px] sm:min-h-[380px] lg:min-h-[420px]">
-              <div>
-                <h3 className="font-serif text-[24px] sm:text-[27px] lg:text-[29px] font-normal text-[#050505] mb-5 sm:mb-6">
-                  Premium pass
-                </h3>
-                <ul className="space-y-2.5 sm:space-y-3 text-[13.5px] sm:text-[14.5px] text-[#111111] font-normal leading-relaxed">
-                  <li className="flex items-start gap-2.5">
-                    <span className="text-[#050505] text-[15px] leading-snug">•</span>
-                    <span>Full training access</span>
-                  </li>
-                  <li className="flex items-start gap-2.5">
-                    <span className="text-[#050505] text-[15px] leading-snug">•</span>
-                    <span>Digital materials</span>
-                  </li>
-                  <li className="flex items-start gap-2.5">
-                    <span className="text-[#050505] text-[15px] leading-snug">•</span>
-                    <span>Certificate of completion</span>
-                  </li>
-                  <li className="flex items-start gap-2.5">
-                    <span className="text-[#050505] text-[15px] leading-snug">•</span>
-                    <span>Bonus resources</span>
-                  </li>
-                  <li className="flex items-start gap-2.5">
-                    <span className="text-[#050505] text-[15px] leading-snug">•</span>
-                    <span>Priority support</span>
-                  </li>
-                </ul>
-              </div>
-
-              <div className="pt-8 sm:pt-10">
-                <span className="text-[32px] sm:text-[36px] lg:text-[40px] font-black text-[#050505] tracking-tight block leading-none">
-                  $199
-                </span>
-              </div>
-            </div>
-
-          </div>
-
-        </div>
-      </section>
+      <AboutEnvironmentalSection />
 
       {/* =========================================================================
           SECTION 04: FAQS & LIFESTYLE SHOWCASE (Pitch Black Background)
