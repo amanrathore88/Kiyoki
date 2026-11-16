@@ -52,13 +52,6 @@ export const AboutPage: React.FC<AboutPageProps> = ({
     window.scrollTo({ top: 0, left: 0, behavior: 'instant' as ScrollBehavior });
   }, []);
 
-  const handleExploreClick = () => {
-    const el = document.getElementById('about-mission');
-    if (el) {
-      el.scrollIntoView({ behavior: 'smooth' });
-    }
-  };
-
   const handleShopClick = () => {
     if (onNavigate) {
       onNavigate('shop');
@@ -72,56 +65,55 @@ export const AboutPage: React.FC<AboutPageProps> = ({
       
       {/* =========================================================================
           SECTION 01: HERO SECTION (White Background)
-          Exact Match to Reference Image 2:
-          - Top-aligned layout: Headline and green image start at top of section
-          - Larger font size with ultra-tight leading (leading-[0.92])
-          - Button: w-[220px] rounded-full royal blue, positioned ~32px below headline
-          - Right Image: aspect-[0.91/1] (466x511 ratio), 45.5% screen width, rounded-2xl/3xl,
-            exact emerald wall, green sofa, brass table image from reference
+          Exact Match to Reference Design:
+          - Top Headline: Two-tone typography
+            "Clean air," in soft sky-blue (#93C5FD), "wherever life takes you." in black (#050505)
+          - Two-column grid below headline:
+            - Left: Two thoughtful editorial paragraphs tailored to Kiyoki's About narrative
+            - Right: Rounded card with pastel sky-blue studio lineup of Kiyoki portable purifiers
          ========================================================================= */}
       <section
         id="about-hero"
         aria-label="About Kiyoki Hero"
-        className="w-full bg-white pt-6 sm:pt-8 lg:pt-10 pb-12 sm:pb-16 lg:pb-20"
+        className="w-full bg-white text-[#050505] pt-10 sm:pt-14 lg:pt-18 pb-14 sm:pb-20 lg:pb-26"
       >
         <div className="w-full max-w-[1440px] xl:max-w-[1560px] mx-auto px-6 sm:px-10 lg:px-12 xl:px-14">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 xl:gap-16 items-start">
-            
-            {/* Left Column: Top-aligned Bold Headline & Pill Button */}
-            <div className="lg:col-span-6 xl:col-span-6 flex flex-col items-start pt-2 sm:pt-4 lg:pt-6">
-              <h1 className="text-[58px] sm:text-[76px] md:text-[88px] lg:text-[96px] xl:text-[104px] font-black leading-[0.92] tracking-[-0.04em] text-[#050505] max-w-[580px]">
-                <span className="text-[#D8CEBE]">Purity</span> that
-                <br />
-                stands the
-                <br />
-                test of time
-              </h1>
+          
+          {/* Top Headline: Two-Tone Typography matching Reference */}
+          <div className="mb-10 sm:mb-12 lg:mb-16">
+            <h1 className="text-[36px] sm:text-[48px] md:text-[56px] lg:text-[62px] xl:text-[68px] font-extrabold tracking-[-0.03em] leading-[1.08] text-[#050505] max-w-4xl">
+              <span className="text-[#93C5FD]">Clean air,</span> wherever life takes you.
+            </h1>
+          </div>
 
-              {/* Royal Blue Pill Button matching reference */}
-              <div className="pt-7 sm:pt-8 lg:pt-9">
-                <button
-                  type="button"
-                  onClick={handleExploreClick}
-                  className="w-[190px] sm:w-[220px] lg:w-[230px] h-[46px] sm:h-[48px] lg:h-[50px] bg-[#4267FF] hover:bg-[#3155EC] active:scale-95 text-white text-[13px] sm:text-[14px] font-bold tracking-[0.2em] uppercase rounded-full flex items-center justify-center transition-all duration-200 cursor-pointer shadow-sm hover:shadow"
-                >
-                  EXPLORE
-                </button>
-              </div>
+          {/* Two-Column Grid: Left Copy & Right Product Lineup Card */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 xl:gap-16 items-center">
+            
+            {/* Left Column: Authentic Brand Narrative */}
+            <div className="lg:col-span-6 xl:col-span-6 flex flex-col justify-center space-y-6 sm:space-y-7">
+              <p className="text-[15px] sm:text-[16px] lg:text-[17.5px] text-neutral-700 leading-[1.74] font-normal">
+                We’re Kiyoki, an advanced air-wellness brand built around one stubborn belief: clean, breathable air should be available to everyone, everywhere. Not just inside an air-conditioned room with a bulky purifier humming in the corner, but out in the world where we actually live our lives.
+              </p>
+              
+              <p className="text-[15px] sm:text-[16px] lg:text-[17.5px] text-neutral-700 leading-[1.74] font-normal">
+                So we engineered air purification you can carry with you—to your commute, your office, your morning walk, and your everyday travels. Grounded in aerosol physics and verified by IIT Kanpur, we don’t think the air you breathe should ever depend on where you happen to be standing.
+              </p>
             </div>
 
-            {/* Right Column: Exact Emerald Green Designer Interior from Reference Image 2 */}
-            <div className="lg:col-span-6 xl:col-span-6 flex justify-center lg:justify-end items-start">
-              <div className="w-full max-w-[540px] xl:max-w-[580px] aspect-[0.91/1] rounded-2xl sm:rounded-3xl lg:rounded-[28px] overflow-hidden bg-[#1E4D38] shadow-sm">
+            {/* Right Column: Soft Sky-Blue Product Card matching Reference */}
+            <div className="lg:col-span-6 xl:col-span-6 flex justify-center lg:justify-end">
+              <div className="w-full max-w-[580px] xl:max-w-[620px] aspect-[1.34/1] rounded-2xl sm:rounded-3xl lg:rounded-[32px] overflow-hidden bg-[#BFDBFE]/60 shadow-lg border border-neutral-100 group">
                 <img
-                  src="/images/about/about-hero-interior-exact.png"
-                  alt="Minimalist luxury interior with emerald green wall, velvet sofa, and brass plant table"
-                  className="w-full h-full object-cover object-center"
+                  src="/images/about/about-hero-portable-lineup.jpg"
+                  alt="Lineup of sleek Kiyoki portable personal air purifiers in modern pastel finishes"
+                  className="w-full h-full object-cover object-center transition-transform duration-700 ease-out group-hover:scale-103"
                   loading="eager"
                 />
               </div>
             </div>
 
           </div>
+
         </div>
       </section>
 
