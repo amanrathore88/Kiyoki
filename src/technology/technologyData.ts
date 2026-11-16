@@ -1,8 +1,12 @@
 export interface TechnologyHeroData {
   eyebrow: string;
-  headlineLine1: string;
-  headlineLine2: string;
-  arrowAriaLabel: string;
+  headline: string;
+  headlineLine1?: string;
+  headlineLine2?: string;
+  description: string;
+  arrowAriaLabel?: string;
+  videoSrc: string;
+  posterSrc: string;
 }
 
 export interface ScienceSectionData {
@@ -35,10 +39,15 @@ export interface ArticleCard {
 
 export const TECHNOLOGY_PAGE_DATA = {
   hero: {
-    eyebrow: 'THE TECHNOLOGY BEHIND KIYOKI',
+    eyebrow: 'ACTIVE IONIZATION & ADVANCED HEPA FILTRATION',
+    headline: 'The Science of Clean Air',
     headlineLine1: 'The Science',
     headlineLine2: 'of Clean Air',
+    description:
+      'Advanced active negative ion emission paired with medical-grade multi-stage filtration to eliminate 99.97% of airborne pollutants, allergens, and ultra-fine particulates. Scientifically engineered for tranquil, whisper-quiet performance and verified for pure living spaces.',
     arrowAriaLabel: 'Scroll down to explore Kiyoki technology',
+    videoSrc: '/videos/1026.mp4',
+    posterSrc: '/images/tech_hero_poster.jpg',
   } as TechnologyHeroData,
 
   strip: {

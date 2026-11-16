@@ -1,122 +1,127 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { TECHNOLOGY_PAGE_DATA } from '../technologyData';
-import heroAtmospherePng from '../assets/images/hero-molecular-atmosphere.png';
 
 interface TechnologyHeroProps {
   onScrollClick?: () => void;
 }
 
-export const TechnologyHero: React.FC<TechnologyHeroProps> = ({ onScrollClick }) => {
+export const TechnologyHero: React.FC<TechnologyHeroProps> = () => {
   const { hero } = TECHNOLOGY_PAGE_DATA;
-  const sectionRef = useRef<HTMLElement>(null);
-  const [offset, setOffset] = useState({ x: 0, y: 0 });
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [isPlaying, setIsPlaying] = useState(true);
 
-  // Interactive mouse tracking parallax: moves the background image in sync with cursor
-  const handleMouseMove = (e: React.MouseEvent<HTMLElement>) => {
-    if (!sectionRef.current) return;
-    const rect = sectionRef.current.getBoundingClientRect();
-    const normX = (e.clientX - rect.left) / rect.width - 0.5; // -0.5 to 0.5
-    const normY = (e.clientY - rect.top) / rect.height - 0.5; // -0.5 to 0.5
+  // Sync state with HTML5 video playback
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
 
-    // Multipliers for fluid, responsive sync movement (offset up to ~36px horizontal, ~24px vertical)
-    setOffset({
-      x: normX * 36,
-      y: normY * 24,
+    const handlePlay = () => setIsPlaying(true);
+    const handlePause = () => setIsPlaying(false);
+
+    video.addEventListener('play', handlePlay);
+    video.addEventListener('pause', handlePause);
+
+    // Attempt initial autoplay
+    video.play().then(() => {
+      setIsPlaying(true);
+    }).catch(() => {
+      // Autoplay might be restricted until user interaction
+      setIsPlaying(!video.paused);
     });
-  };
 
-  const handleMouseLeave = () => {
-    // Smoothly settle back to center when cursor leaves section
-    setOffset({ x: 0, y: 0 });
-  };
+    return () => {
+      video.removeEventListener('play', handlePlay);
+      video.removeEventListener('pause', handlePause);
+    };
+  }, []);
 
-  const handleScroll = () => {
-    if (onScrollClick) {
-      onScrollClick();
+  const handleTogglePlay = () => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    if (video.paused) {
+      video.play().catch((err) => {
+        console.warn('Playback error:', err);
+      });
     } else {
-      const nextSection = document.getElementById('engineered-strip') || document.getElementById('our-science');
-      if (nextSection) {
-        nextSection.scrollIntoView({ behavior: 'smooth' });
-      }
+      video.pause();
     }
   };
 
   return (
     <section
-      ref={sectionRef}
       id="technology-hero"
       aria-label="Technology Hero"
-      onMouseMove={handleMouseMove}
-      onMouseLeave={handleMouseLeave}
-      className="relative w-full bg-[#050811] text-white overflow-hidden min-h-[520px] sm:min-h-[560px] lg:h-[620px] xl:h-[640px] flex items-center"
+      className="relative w-full bg-[#050811] text-white overflow-hidden min-h-[500px] sm:min-h-[560px] md:min-h-[600px] lg:h-[640px] xl:h-[660px] flex items-center justify-center select-none"
     >
-      {/* LAYER 1 & 2: Base Background (#050811) + Atmospheric Molecular Image (at 70% opacity, moving in sync with mouse cursor) */}
-      <div className="absolute inset-0 z-0 pointer-events-none select-none overflow-hidden">
-        <img
-          src={heroAtmospherePng}
-          alt=""
-          role="presentation"
-          style={{
-            transform: `translate3d(${offset.x}px, ${offset.y}px, 0) scale(1.08)`,
-            transition: 'transform 0.22s cubic-bezier(0.25, 1, 0.5, 1)',
-            willChange: 'transform',
-          }}
-          className="w-full h-full object-cover object-center opacity-70"
-        />
+      {/* Background HTML5 Video Layer */}
+      <div className="absolute inset-0 z-0 overflow-hidden">
+        <video
+          ref={videoRef}
+          autoPlay
+          loop
+          muted
+          playsInline
+          poster={hero.posterSrc}
+          className="w-full h-full object-cover object-center pointer-events-none"
+        >
+          <source src={hero.videoSrc} type="video/mp4" />
+          <source src="/videos/kiyoki-breathe-well.mp4" type="video/mp4" />
+        </video>
       </div>
 
-      {/* Main Content Area: Framed Typography Box positioned on the Left */}
-      <div className="relative z-10 w-full max-w-[1440px] xl:max-w-[1600px] mx-auto h-full px-6 sm:px-10 lg:px-14 xl:px-16 flex items-center justify-start py-6 sm:py-8 lg:py-0">
+      {/* Cinematic Dark Overlay for optimal text legibility matching reference */}
+      <div
+        className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/45 to-black/65 z-10 pointer-events-none"
+        aria-hidden="true"
+      />
+
+      {/* Centered Typography Content Area: Matches Reference Image 2 */}
+      <div className="relative z-20 w-full max-w-4xl mx-auto px-6 sm:px-8 text-center flex flex-col items-center justify-center py-16 sm:py-20">
         
-        {/* Architectural Framed Box: Exact Match to Reference (Sharp rectangular 1px border, transparent glass, bold/light typography, standalone bottom-right down arrow) */}
-        <div className="ky-tech-hero-frame relative w-full max-w-[440px] sm:max-w-[470px] lg:max-w-[490px] xl:max-w-[520px] min-h-[400px] sm:min-h-[450px] lg:h-[490px] xl:h-[510px] border border-white/45 p-6 sm:p-8 lg:p-10 flex flex-col justify-between bg-transparent">
-          
-          {/* Top Eyebrow & High-Contrast Editorial Headline */}
-          <div>
-            <p className="text-[11px] sm:text-[12px] lg:text-[13px] font-bold tracking-[0.24em] text-white/90 uppercase font-sans mb-4 sm:mb-6">
-              {hero.eyebrow}
-            </p>
-            
-            <h1 className="text-[44px] sm:text-[54px] md:text-[60px] lg:text-[66px] xl:text-[70px] leading-[0.98] tracking-[-0.035em] text-white">
-              <span className="block font-black text-white">
-                {hero.headlineLine1}
-              </span>
-              <span className="block font-light text-white mt-1 sm:mt-1.5">
-                {hero.headlineLine2}
-              </span>
-            </h1>
-          </div>
+        {/* Eyebrow Tag: Champagne Gold / Amber Accent */}
+        <p className="text-[#C8A97E] text-[11px] sm:text-xs md:text-sm font-bold tracking-[0.22em] uppercase mb-3 sm:mb-4 drop-shadow-sm">
+          {hero.eyebrow}
+        </p>
 
-          {/* Bottom Section with Clean Down Arrow Indicator (No circle container, matching reference image) */}
-          <div className="flex justify-end pt-6 pr-1 pb-1">
-            <button
-              type="button"
-              onClick={handleScroll}
-              aria-label={hero.arrowAriaLabel}
-              className="group focus:outline-none focus-visible:ring-2 focus-visible:ring-white cursor-pointer p-2 transition-transform duration-300 hover:translate-y-1.5 active:scale-95"
-            >
-              <svg
-                width="34"
-                height="42"
-                viewBox="0 0 34 42"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-                className="text-white drop-shadow-sm"
-              >
-                <path
-                  d="M17 2V38M17 38L3 24M17 38L31 24"
-                  stroke="currentColor"
-                  strokeWidth="2.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-            </button>
-          </div>
+        {/* Main Headline: Bold White Text */}
+        <h1 className="text-white text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight leading-[1.1] mb-4 sm:mb-6 drop-shadow-md">
+          {hero.headline}
+        </h1>
 
-        </div>
+        {/* Descriptive Paragraph: Clear, High-Readability 2-3 Sentences */}
+        <p className="text-white/90 text-sm sm:text-base md:text-lg leading-relaxed sm:leading-relaxed max-w-2xl sm:max-w-3xl mx-auto font-normal drop-shadow">
+          {hero.description}
+        </p>
       </div>
 
+      {/* Bottom-Right Video Play / Pause Floating Toggle Button */}
+      <div className="absolute bottom-6 right-6 sm:bottom-8 sm:right-8 lg:bottom-10 lg:right-10 z-20">
+        <button
+          type="button"
+          onClick={handleTogglePlay}
+          aria-label={isPlaying ? 'Pause background video' : 'Play background video'}
+          className="w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-white text-black shadow-2xl flex items-center justify-center hover:scale-110 active:scale-95 transition-all duration-200 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
+        >
+          {isPlaying ? (
+            <svg
+              className="w-4 h-4 fill-current"
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+            >
+              <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z" />
+            </svg>
+          ) : (
+            <svg
+              className="w-4 h-4 fill-current ml-0.5"
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+            >
+              <path d="M8 5v14l11-7z" />
+            </svg>
+          )}
+        </button>
+      </div>
     </section>
   );
 };
