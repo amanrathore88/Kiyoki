@@ -104,19 +104,24 @@ export const AboutPage: React.FC<AboutPageProps> = ({
           
           {/* Centered Main Heading with Ultra-Smooth Dynamic Animated Word */}
           <div className="text-center max-w-4xl lg:max-w-5xl mx-auto mb-12 sm:mb-16 lg:mb-20">
-            <h1 className="text-[38px] sm:text-[50px] md:text-[60px] lg:text-[66px] xl:text-[72px] font-black tracking-[-0.035em] leading-[1.08] text-[#050505]">
-              <span className="inline-block relative overflow-hidden align-baseline">
-                <span
-                  className={`inline-block text-[#3B82F6] will-change-transform ${
+            <h1 className="text-[38px] sm:text-[50px] md:text-[60px] lg:text-[66px] xl:text-[72px] font-black tracking-[-0.035em] leading-tight sm:leading-[1.12] text-[#050505]">
+              <span
+                className="inline-block text-[#3B82F6] will-change-transform"
+                style={{
+                  opacity: animationState === 'visible' ? 1 : 0,
+                  transform:
                     animationState === 'visible'
-                      ? 'opacity-100 translate-y-0 filter-none transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]'
+                      ? 'translateY(0)'
                       : animationState === 'exit'
-                      ? 'opacity-0 -translate-y-[35%] blur-[1.5px] transition-all duration-300 ease-in'
-                      : 'opacity-0 translate-y-[35%] blur-[1.5px] transition-none'
-                  }`}
-                >
-                  {DYNAMIC_HERO_WORDS[dynamicWordIndex]}
-                </span>
+                      ? 'translateY(-10px)'
+                      : 'translateY(10px)',
+                  transition:
+                    animationState === 'enter'
+                      ? 'none'
+                      : 'opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1), transform 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
+                }}
+              >
+                {DYNAMIC_HERO_WORDS[dynamicWordIndex]}
               </span>{' '}
               <span className="text-[#3B82F6]">air,</span>{' '}
               <span>wherever life takes you.</span>
